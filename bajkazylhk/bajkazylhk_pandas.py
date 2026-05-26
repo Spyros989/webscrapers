@@ -1,11 +1,18 @@
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import pandas as pd
+from pathlib import Path
+from datetime import datetime
+
 
 URL = "https://bajkazylhk.cz/akce"
 BASE_URL = "https://bajkazylhk.cz"
 
-OUTPUT_FILE = r"C:\Users\Spyro\Desktop\test_scrappers\bajkazylhk\bajkazyl_events.csv"
+# safer path handling
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/bajkazylhk")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+OUTPUT_FILE = OUTPUT_DIR / "bajkazylhk_events.csv"
 
 with sync_playwright() as p:
 
@@ -48,7 +55,9 @@ for event in events:
     results.append({
         "date": date.get_text(strip=True),
         "artist": title.get_text(strip=True),
-        "link": link
+        "link": link,
+        'extraction_datetime': datetime.now().strftime("%Y%m%d_%H%M%S")
+
     })
 
 # Create dataframe
