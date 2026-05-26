@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import pandas as pd
 from pathlib import Path
+from datetime import datetime
 
 URL = "https://www.kabinetmuz.cz/program"
 BASE_URL = "https://www.kabinetmuz.cz"
@@ -50,7 +51,8 @@ for element in soup.find_all(["h2", "a"]):
                 "month": current_month,
                 "date": date.get_text(strip=True),
                 "artist": title.get_text(strip=True),
-                "link": full_link
+                "link": full_link,
+                'extraction_datetime': datetime.now().strftime("%Y%m%d_%H%M%S")
             })
 
 # Create dataframe

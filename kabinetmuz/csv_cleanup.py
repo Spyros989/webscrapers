@@ -6,8 +6,8 @@ from pathlib import Path
 # FILE PATHS
 # =========================
 
-INPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz_events.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz_events_edited.csv")
+INPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events.csv")
+OUTPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_edited.csv")
 
 # =========================
 # DATA RULES
@@ -65,7 +65,7 @@ df["sql_date"] = df.apply(
 
 df["sql_date"] = pd.to_datetime(df["sql_date"])
 
-df = df[["sql_date", "artist", "link"]]
+df = df[["sql_date", "artist", "link","extraction_datetime"]]
 
 # =========================
 # SAVE RESULT
