@@ -65,7 +65,7 @@ def parse_czech_date(text):
 df["sql_date"] = df["date"].apply(parse_czech_date)
 
 # Keep only desired columns
-df = df[["sql_date", "artist", "link"]]
+df = df[["sql_date", "artist", "link","extraction_datetime"]]
 
 # Save cleaned CSV
 df.to_csv(
