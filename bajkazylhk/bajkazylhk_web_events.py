@@ -57,7 +57,6 @@ for event in events:
         "artist": title.get_text(strip=True),
         "link": link,
         "extraction_datetime": datetime.now().strftime("%Y%m%d_%H%M%S")
-
     })
 
 # Create dataframe
