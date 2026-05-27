@@ -56,7 +56,7 @@ for event in events:
         "date": date.get_text(strip=True),
         "artist": title.get_text(strip=True),
         "link": link,
-        'extraction_datetime': datetime.now().strftime("%Y%m%d_%H%M%S")
+        "extraction_datetime": datetime.now().strftime("%Y%m%d_%H%M%S")
 
     })
 
