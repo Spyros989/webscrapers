@@ -10,7 +10,7 @@ BASE_DIR = Path("/home/deploy/data/scrapers/metal_archives")
 
 INPUT_FILE = BASE_DIR / "cz_metal_bands_raw.csv"
 
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+timestamp = datetime.now().strftime("%Y%m%d")
 
 OUTPUT_FILE = BASE_DIR / f"cz_metal_bands_edited_{timestamp}.csv"
 # ----------------------------
