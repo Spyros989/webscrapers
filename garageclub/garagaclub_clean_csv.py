@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 INPUT_FILE = Path("/home/deploy/data/scrapers/garageclub/garageclub.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/garageclub/garageclub_edited_csv")
+OUTPUT_FILE = Path("/home/deploy/data/scrapers/garageclub/garageclub_events_edited.csv")
 
 # load CSV
 df = pd.read_csv(INPUT_FILE)
