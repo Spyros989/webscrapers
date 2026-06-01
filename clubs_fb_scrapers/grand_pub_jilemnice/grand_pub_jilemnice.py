@@ -10,12 +10,12 @@ from datetime import datetime
 
 
 # safer path handling
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/falconclub")
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/grand_pub_jilemnice")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # setting date variable
 today = datetime.today().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / f"falconclub_{today}.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"grand_pub_jilemnice_{today}.csv"
 # ----------------------------
 # Setup Chrome
 # ----------------------------
@@ -33,7 +33,7 @@ driver = webdriver.Chrome(options=options)
 # ----------------------------
 # Open page
 # ----------------------------
-url = "https://www.facebook.com/falconclub.cz/events"
+url = "https://www.facebook.com/profile.php?id=100057358521804&sk=events"
 driver.get(url)
 
 # Wait for page load
