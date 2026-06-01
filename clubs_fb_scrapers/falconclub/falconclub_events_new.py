@@ -15,8 +15,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # setting date variable
 today = datetime.today().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / "falconclub_{today}.csv"
-
+OUTPUT_FILE = OUTPUT_DIR / f"falconclub_{today}.csv"
 # ----------------------------
 # Setup Chrome
 # ----------------------------
@@ -24,11 +23,12 @@ options = Options()
 
 # Headless mode
 options.add_argument("--headless=new")
-
-# Helps avoid Facebook blocking
-options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
 
+driver = webdriver.Chrome(options=options)
 driver = webdriver.Chrome(options=options)
 
 # ----------------------------
