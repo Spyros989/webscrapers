@@ -10,10 +10,10 @@ from datetime import datetime
 # =========================================================
 timestamp = datetime.now().strftime("%Y%m%d")
 BASE_DIR = Path("/home/deploy/data/scrapers/metal_archives")
-INPUT_FILE = BASE_DIR / "cz_metal_bands_edited_20260529.csv"
+INPUT_FILE = BASE_DIR / "cz_metal_bands_edited_dedup_20260607.csv"
 # Change these however you want
 START_INDEX = 0
-END_INDEX = 1109
+END_INDEX = 1111
 
 SAVE_EVERY = 25
 OUTPUT_FILE = BASE_DIR / f"cz_metal_bands_fb_links_{timestamp}.csv"

@@ -10,9 +10,9 @@ from datetime import datetime
 # CONFIG
 # =========================================================
 timestamp = datetime.now().strftime("%Y%m%d")
-BASE_DIR = Path("/home/deploy/data/scrapers/ma_cz_bands_ad_events")
-INPUT_FILE = BASE_DIR / "ma_cz_bands_events_2026-06-07.csv"
-OUTPUT_FILE = BASE_DIR / f"ma_cz_metal_bands_fb_dates_{timestamp}.csv"
+BASE_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
+INPUT_FILE = BASE_DIR / "cz_clubs_fb_events_2026-06-10.csv"
+OUTPUT_FILE = BASE_DIR / f"cz_clubs_fb_events_dates_{timestamp}.csv"
 # CSV must have a column like: "url"
 df = pd.read_csv(INPUT_FILE)
 
