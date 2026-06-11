@@ -2,13 +2,16 @@ import time
 import random
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
-from dotenv import load_dotenv
+import os
 
-load_dotenv()
+os.system("pkill -f chromedriver")
+os.system("pkill -f chrome")
+
 # =========================================================
 # CONFIG
 # =========================================================
-EVENT_URL = "https://www.facebook.com/events/1371873384419773/"
+EVENT_URL = "https://www.facebook.com/events/877761904631563/"
+
 # =========================================================
 # CHROME SETUP
 # =========================================================
@@ -48,57 +51,41 @@ else:
 spans = driver.find_elements(By.TAG_NAME, "span")
 
 print("\n===== ALL SPANS (LIVE VIEW) =====\n")
-
 for i, s in enumerate(spans):
     txt = s.text.strip()
     if txt:
         print(f"{i:03d} | {txt}")
+DATE_INDEX = 31
+NAME_INDEX = 50
+LOCATION_INDEX = 52
+ATTENDANCE_INDEX = 70
 
-# =========================================================
-# DATE CANDIDATES
-# =========================================================
-print("\n===== DATE CANDIDATES =====\n")
+#print("\n===== KEY SPANS (BY INDEX) =====\n")
+#print(f"Date: {DATE_INDEX}")
+#print(f"Name: {NAME_INDEX}")
+#print(f"Location: {LOCATION_INDEX}")
+#print(f"Attendance: {ATTENDANCE_INDEX}")
 
-for s in spans:
-    txt = s.text.strip()
-    if not txt:
-        continue
+#spans = driver.find_elements(By.TAG_NAME, "span")
 
-    if (
-        "2026" in txt
-        or "pm" in txt.lower()
-        or "am" in txt.lower()
-        or "–" in txt
-    ):
-        print(">>", txt)
+def get(i):
+    try:
+        return spans[i].text.strip()
+    except:
+        return None
 
-# =========================================================
-# FINAL EXTRACTION
-# =========================================================
-date = None
-
-for s in spans:
-    txt = s.text.strip()
-
-    if any(month in txt.lower() for month in [
-        "january","february","march","april","may","june",
-        "july","august","september","october","november","december",
-        "jan","feb","mar","apr","jun","jul","aug","sep","oct","nov","dec"
-    ]) and ("pm" in txt.lower() or "am" in txt.lower() or "–" in txt):
-        date = txt
-        break
-
-if not date:
-    for s in spans:
-        txt = s.text.strip()
-        if "2026" in txt:
-            date = txt
-            break
+event_datetime = get(DATE_INDEX)
+event_name = get(NAME_INDEX)
+location = get(LOCATION_INDEX)
+attendance = get(ATTENDANCE_INDEX)
 
 # =========================================================
 # OUTPUT
 # =========================================================
 print("\n===== FINAL RESULT =====")
-print("Date:", date)
+print("Date:", event_datetime)
+print("Name:", event_name)
+print("Location:", location)
+print("Attendance:", attendance)
 
 driver.quit()

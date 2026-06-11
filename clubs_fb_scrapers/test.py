@@ -2,7 +2,9 @@ import time
 import random
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # =========================================================
 # CONFIG
