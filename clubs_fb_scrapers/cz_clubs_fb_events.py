@@ -111,7 +111,7 @@ for _, row in df_clubs.iterrows():
                     "club_name": club_name,
                     "event_name": text,
                     "event_url": link,
-                    "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
                 })
 
             except Exception as ex:

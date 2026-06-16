@@ -8,7 +8,7 @@ load_dotenv()
 # =========================================================
 # CONFIG
 # =========================================================
-EVENT_URL = "https://www.facebook.com/events/1371873384419773/"
+EVENT_URL = "https://www.facebook.com/events/846239795174953/"
 # =========================================================
 # CHROME SETUP
 # =========================================================
@@ -28,7 +28,7 @@ driver = uc.Chrome(options=options)  # IMPORTANT: no version pin
 print(f"\nOpening: {EVENT_URL}")
 driver.get(EVENT_URL)
 
-time.sleep(random.uniform(5, 8))
+time.sleep(random.uniform(5, 20))
 
 # =========================================================
 # CHECK PAGE STATUS

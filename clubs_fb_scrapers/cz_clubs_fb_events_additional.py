@@ -7,7 +7,9 @@ import undetected_chromedriver as uc
 from pathlib import Path
 from datetime import datetime
 import subprocess
+from dotenv import load_dotenv
 
+load_dotenv()
 # =========================================================
 # KILL OLD CHROME SESSIONS
 # =========================================================
@@ -22,8 +24,8 @@ kill_chrome()
 # =========================================================
 timestamp = datetime.now().strftime("%Y%m%d")
 BASE_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
-INPUT_FILE = BASE_DIR / "cz_clubs_fb_events_2026-06-10.csv"
-OUTPUT_FILE = BASE_DIR / f"cz_clubs_fb_events_dates_additional_{timestamp}.csv"
+INPUT_FILE = BASE_DIR / "cz_clubs_fb_events_dates_additional_20260610_retry.csv"
+OUTPUT_FILE = BASE_DIR / f"cz_clubs_fb_events_dates_additional_20260610_retry_results.csv"
 
 df = pd.read_csv(INPUT_FILE)
 
@@ -55,7 +57,7 @@ def safe(span_list, i):
 # =========================================================
 for index, row in df.iterrows():
 
-    url = row["event_url"]
+    url = row["url"]
     print(f"\nProcessing: {url}")
 
     try:

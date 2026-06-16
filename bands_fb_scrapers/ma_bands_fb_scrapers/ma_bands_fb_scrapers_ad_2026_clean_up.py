@@ -6,8 +6,8 @@ from pathlib import Path
 # CONFIG
 # =========================================================
 
-INPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_dates_20260616.csv"
-OUTPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_dates_20260616_clean.csv"
+INPUT_FILE = "/home/deploy/data/scrapers/ma_cz_bands_ad_events/ma_cz_metal_bands_fb_dates_20260607.csv"
+OUTPUT_FILE = "/home/deploy/data/scrapers/ma_cz_bands_ad_events/ma_cz_metal_bands_fb_dates_20260607_clean.csv"
 
 # =========================================================
 # LOAD CSV
