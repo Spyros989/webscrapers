@@ -9,7 +9,7 @@ URL = "https://bajkazylhk.cz/akce"
 BASE_URL = "https://bajkazylhk.cz"
 
 # safer path handling
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/bajkazylhk")
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_web_events/bajkazylhk")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_FILE = OUTPUT_DIR / "bajkazylhk_events.csv"
@@ -56,7 +56,7 @@ for event in events:
         "date": date.get_text(strip=True),
         "artist": title.get_text(strip=True),
         "link": link,
-        "extraction_datetime": datetime.now().strftime("%Y%m%d_%H%M%S")
+        "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
     })
 
 # Create dataframe

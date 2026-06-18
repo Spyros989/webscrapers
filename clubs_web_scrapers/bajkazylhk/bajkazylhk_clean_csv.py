@@ -5,8 +5,8 @@ from pathlib import Path
 # FILE PATHS
 # =========================
 
-INPUT_FILE = Path("/home/deploy/data/scrapers/bajkazylhk/bajkazylhk_events.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/bajkazylhk/bajkazylhk_events_edited.csv")
+INPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/bajkazylhk/bajkazylhk_events.csv")
+OUTPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/bajkazylhk/bajkazylhk_events_edited.csv")
 
 # =========================
 # DATA RULES

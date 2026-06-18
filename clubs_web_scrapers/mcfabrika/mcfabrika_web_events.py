@@ -8,7 +8,7 @@ BASE_URL = "https://www.mcfabrika.cz"
 CALENDAR_URL = "https://www.mcfabrika.cz/kalendar-akci/2026"
 
 # safer path handling
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/mcfabrika")
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events.csv"
@@ -79,7 +79,7 @@ with sync_playwright() as p:
                     "raw_date": raw_date,
                     "artist": title,
                     "link": link,
-                    "extraction_datetime": datetime.now().strftime("%Y%m%d_%H%M%S")
+                    "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
                 })
 
         except Exception as e:

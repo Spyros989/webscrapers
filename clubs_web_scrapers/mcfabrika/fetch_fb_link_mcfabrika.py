@@ -9,8 +9,8 @@ from pathlib import Path
 # FILE PATHS
 # =========================
 
-INPUT_FILE = Path("/home/deploy/data/scrapers/mcfabrika/mcfabrika_events_edited.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/mcfabrika/mcfabrika_events_edited_fb_links.csv")
+INPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika/mcfabrika_events_edited.csv")
+OUTPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika/mcfabrika_events_edited_fb_links.csv")
 
 # LOAD CSV
 df = pd.read_csv(INPUT_FILE)

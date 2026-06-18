@@ -37,7 +37,7 @@ OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 today = datetime.now().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_{today}.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_daily.csv"
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
