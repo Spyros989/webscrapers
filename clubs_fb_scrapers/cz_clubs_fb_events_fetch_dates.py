@@ -14,7 +14,7 @@ load_dotenv()
 # =========================================================
 timestamp = datetime.now().strftime("%Y%m%d")
 BASE_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
-INPUT_FILE = BASE_DIR / "cz_clubs_fb_events_2026-06-16.csv"
+INPUT_FILE = BASE_DIR / "cz_clubs_fb_events_daily_deltas_20260619.csv"
 OUTPUT_FILE = BASE_DIR / f"cz_clubs_fb_events_dates_{timestamp}.csv"
 # CSV must have a column like: "url"
 df = pd.read_csv(INPUT_FILE)

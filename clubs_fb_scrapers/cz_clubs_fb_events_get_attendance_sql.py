@@ -50,6 +50,7 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT event_url from cz_clubs_fb_events_merged
+    where event_date >=date(now()) 
     """)
 
 with engine.connect() as conn:
