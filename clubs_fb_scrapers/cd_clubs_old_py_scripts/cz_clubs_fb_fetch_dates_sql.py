@@ -1,0 +1,148 @@
+from email.mime import text
+import time
+import random
+import pandas as pd
+from sqlalchemy import create_engine, text
+from selenium.webdriver.common.by import By
+import undetected_chromedriver as uc
+from pathlib import Path
+from datetime import datetime
+import os 
+from dotenv import load_dotenv
+
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+load_dotenv()
+# =========================================================
+# CONFIG
+# =========================================================
+os.system("pkill -f chromedriver")
+os.system("pkill -f chrome")
+# =========================================================
+# CONFIG
+# =========================================================
+timestamp = datetime.now().strftime("%Y-%m-%d")
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+load_dotenv()
+
+print("Loading .env from:", env_path)
+
+load_dotenv(dotenv_path=env_path)
+
+print("DB_HOST after load:", os.getenv("DB_HOST"))
+
+# ----------------------------
+# CONFIG
+# ----------------------------
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
+engine = create_engine(
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_fetch_dates.csv"
+#cz_clubs_fb_events_dates_20260610.csv
+
+with engine.connect() as conn:
+    print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
+    print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
+# ----------------------------
+# LOAD BANDS FROM POSTGRES
+# ----------------------------
+query = text("""
+        select distinct ccfed.event_url ,ccfedc.status,ccfedc.event_date  
+        from cz_clubs_fb_events_daily ccfed 
+        left join cz_clubs_fb_events_dates_clean ccfedc on ccfed.event_url=ccfedc.url 
+        where ccfedc.event_date is null and ccfedc.status is null
+        """)
+
+with engine.connect() as conn:
+    df = pd.read_sql(query, conn)
+
+print(f"Loaded {len(df)} urls from Postgres")
+
+
+# =========================================================
+# CHROME SETUP
+# =========================================================
+options = uc.ChromeOptions()
+
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+
+driver = uc.Chrome(options=options, version_main=149)
+
+# =========================================================
+# STORAGE
+# =========================================================
+results = []
+
+# =========================================================
+# LOOP URLS
+# =========================================================
+for index, row in df.iterrows():
+
+    url = row["event_url"]
+
+    print(f"\nProcessing: {url}")
+
+    try:
+        driver.get(url)
+        time.sleep(random.uniform(5, 8))
+
+        # =====================================================
+        # DATE EXTRACTION ONLY
+        # =====================================================
+        date = None
+        spans = driver.find_elements(By.TAG_NAME, "span")
+
+        for s in spans:
+            txt = s.text.strip()
+
+            if any(month in txt.lower() for month in [
+                "january","february","march","april","may","june",
+                "july","august","september","october","november","december"
+            ]) and ("pm" in txt.lower() or "am" in txt.lower() or "–" in txt):
+                date = txt
+                break
+
+        # fallback
+        if not date:
+            for s in spans:
+                txt = s.text.strip()
+                if "2026" in txt:
+                    date = txt
+                    break
+
+        results.append({
+            "url": url,
+            "date": date
+        })
+
+        print("✔ extracted, date")
+
+    except Exception as e:
+        print("ERROR:", e)
+
+        results.append({
+            "url": url,
+            "date": None
+        })
+
+# =========================================================
+# SAVE OUTPUT
+# =========================================================
+driver.quit()
+
+out_df = pd.DataFrame(results)
+out_df.to_csv(OUTPUT_FILE, index=False)
+
+print("\nDONE")

@@ -1,7 +1,6 @@
 import pandas as pd
 
 input_file ="/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_responds_daily.csv"
-#"cz_clubs_fb_events_responds_daily.csv"
 
 df = pd.read_csv(input_file)
 
