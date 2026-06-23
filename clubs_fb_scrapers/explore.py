@@ -3,12 +3,18 @@ import random
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 from dotenv import load_dotenv
+import os 
+from pathlib import Path
 
+os.system("pkill -f chromedriver")
+os.system("pkill -f chrome")
+
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
 load_dotenv()
 # =========================================================
 # CONFIG
 # =========================================================
-EVENT_URL = "https://www.facebook.com/events/1000547625806067/"
+EVENT_URL = "https://www.facebook.com/events/1002307286118438/"
 # =========================================================
 # CHROME SETUP
 # =========================================================
@@ -20,8 +26,8 @@ options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
 
-driver = uc.Chrome(options=options)  # IMPORTANT: no version pin
-
+#driver = uc.Chrome(options=options)  # IMPORTANT: no version pin
+driver = uc.Chrome(options=options, version_main=149)
 # =========================================================
 # LOAD PAGE
 # =========================================================

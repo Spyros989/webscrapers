@@ -39,18 +39,19 @@ engine = create_engine(
 
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_responds_daily_{timestamp}_.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_responds_daily.csv"
 
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
     print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
 # ----------------------------
-# LOAD BANDS FROM POSTGRES
+# LOAD EVENT URLs FROM POSTGRES
 # ----------------------------
 query = text("""
-    SELECT event_url from cz_clubs_fb_events_merged
-    where event_date >=date(now()) 
+    select distinct event_url from cz_clubs_fb_events_daily ccfed
+join cz_clubs_fb_events_dates_clean ccfedc on ccfed.event_url=ccfedc.url
+where ccfedc.status = 'ok' and cast(ccfedc.event_date as date) >=date(now())  
     """)
 
 with engine.connect() as conn:

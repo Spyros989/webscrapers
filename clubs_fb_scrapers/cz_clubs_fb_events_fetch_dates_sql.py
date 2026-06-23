@@ -52,7 +52,7 @@ with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
     print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
 # ----------------------------
-# LOAD BANDS FROM POSTGRES
+# LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
 query = text("""
         select distinct ccfed.event_url ,ccfedc.status,ccfedc.event_date  
