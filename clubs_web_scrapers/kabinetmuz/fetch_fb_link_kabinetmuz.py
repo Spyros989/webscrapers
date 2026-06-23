@@ -9,8 +9,8 @@ from pathlib import Path
 # FILE PATHS
 # =========================
 
-INPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_edited.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_edited_fb_links.csv")
+INPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_daily_clean.csv")
+OUTPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_daily_clean_fb_links.csv")
 
 # =========================
 # Load CSV

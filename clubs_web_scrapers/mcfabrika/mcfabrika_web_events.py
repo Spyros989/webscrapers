@@ -11,7 +11,7 @@ CALENDAR_URL = "https://www.mcfabrika.cz/kalendar-akci/2026"
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events.csv"
+OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events_daily.csv"
 results = []
 
 with sync_playwright() as p:

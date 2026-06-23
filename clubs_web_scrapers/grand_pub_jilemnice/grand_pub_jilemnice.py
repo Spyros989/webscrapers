@@ -56,7 +56,7 @@ for e in event_elements:
             events.append({
                 "text": text,
                 "link": link,
-        	"extraction_datetime": datetime.now().strftime("%Y%m%d_%H%M%S")
+        	"extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
             })
 
     except Exception as ex:

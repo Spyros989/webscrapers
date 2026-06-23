@@ -11,7 +11,7 @@ BASE_URL = "https://www.kabinetmuz.cz"
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/kabinet_muz")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUTPUT_FILE = OUTPUT_DIR / "kabinet_muz_events.csv"
+OUTPUT_FILE = OUTPUT_DIR / "kabinet_muz_events_daily.csv"
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
