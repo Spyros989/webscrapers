@@ -16,7 +16,7 @@ OUTPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika/mcf
 df = pd.read_csv(INPUT_FILE)
 
 # NEW COLUMN
-df["facebook_event"] = ""
+df["event_url"] = ""
 
 with sync_playwright() as p:
 
@@ -26,7 +26,7 @@ with sync_playwright() as p:
 
     for idx, row in df.iterrows():
 
-        url = row["link"]
+        url = row["web_link"]
 
         print(f"\nChecking: {url}")
 
@@ -64,12 +64,12 @@ with sync_playwright() as p:
                         fb_link = href
                         break
 
-            df.at[idx, "facebook_event"] = fb_link
+            df.at[idx, "event_url"] = fb_link
 
             if fb_link:
-                print("FOUND FB EVENT")
+                print("FOUND FB EVENT!")
             else:
-                print("NO FB EVENT")
+                print("NO FB EVENT..")
 
             # small delay
             time.sleep(1)

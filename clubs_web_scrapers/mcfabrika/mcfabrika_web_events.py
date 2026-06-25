@@ -77,8 +77,8 @@ with sync_playwright() as p:
                     "year": 2026,
                     "month": month,
                     "raw_date": raw_date,
-                    "artist": title,
-                    "link": link,
+                    "event_name": title,
+                    "web_link": link,
                     "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
                 })
 
@@ -88,7 +88,6 @@ with sync_playwright() as p:
 
 # CLOSE BROWSER
     browser.close()
-
 # DATAFRAME
 df = pd.DataFrame(results)
 
@@ -103,5 +102,5 @@ df.to_csv(
 )
 
 print("\nDONE")
-print(f"Saved {len(df)} events")
+print(f"Saved {len(df)} events an \n OUTPUT_FILE")
 print(OUTPUT_FILE)

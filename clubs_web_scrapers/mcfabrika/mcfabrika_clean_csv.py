@@ -69,8 +69,8 @@ df[["sql_date", "event_time"]] = df.apply(
 df = df[[
     "sql_date",
     "event_time",
-    "artist",
-    "link",
+    "event_name",
+    "web_link",
     "extraction_datetime"
 ]]
 
