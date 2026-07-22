@@ -3,7 +3,6 @@ import random
 from sqlalchemy import create_engine, text
 import pandas as pd
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 import undetected_chromedriver as uc
 from pathlib import Path
 from datetime import datetime
@@ -64,21 +63,18 @@ print(f"Loaded {len(df)} urls from Postgres")
 # =========================================================
 # CHROME SETUP
 # =========================================================
-def create_driver():
-    options = uc.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--remote-debugging-port=9222")
+options = uc.ChromeOptions()
 
-    options.binary_location = "/snap/bin/chromium"
-    driver = uc.Chrome(options=options, version_main=149)
-    driver.set_page_load_timeout(30)
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+options.add_argument("--remote-debugging-port=9222")
 
-    return driver
-driver = create_driver()
+options.binary_location = "/snap/bin/chromium"
+driver = uc.Chrome(options=options, version_main=149)
+
 # =========================================================
 # STORAGE
 # =========================================================
@@ -87,71 +83,47 @@ results = []
 # =========================================================
 # LOOP URLS
 # =========================================================
-
 for index, row in df.iterrows():
-
     url = row["event_url"]
 
-    print("\n" + "=" * 80)
-    print(f"Processing: {url}")
+    print(f"\nProcessing: {url}")
 
-    attendance = None
-    if index % 5 == 0 and index != 0:
-        print("Restarting Chrome to prevent freeze...")
-        try:
-    	    driver.quit()
-        except:
-            pass
-        driver = create_driver()
     try:
+        print("=" * 80)
+        print("Processing:", url)
         driver.get(url)
-        print("Page loaded")
-
-        # optional delay (helps FB finish rendering)
-        time.sleep(random.uniform(2, 5))
-
-        print("Searching spans...")
-
-        spans = driver.find_elements(By.TAG_NAME, "span")
-
-        for s in spans:
-            txt = s.text.strip()
-
-            if "people responded" in txt.lower():
-                attendance = txt
-                break
-
-        results.append({
-            "url": url,
-            "attendance": attendance,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-
-        print("✔ extracted:", attendance)
-
-    except TimeoutException:
-        print(f"Timeout loading {url}")
-
-        results.append({
-            "url": url,
-            "attendance": None,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "error": "timeout"
-        })
-
-        continue
-
     except Exception as e:
         print("ERROR:", e)
-
+        
         results.append({
             "url": url,
             "attendance": None,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "error": str(e)
+            "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
         continue
+
+    time.sleep(random.uniform(10,25))
+
+    attendance = None
+    print("Searching spans...")
+    spans = driver.find_elements(By.TAG_NAME, "span")
+
+    for s in spans:
+        txt = s.text.strip()
+
+        if "people responded" in txt.lower():
+            attendance = txt
+            break
+
+    results.append({
+        "url": url,
+        "attendance": attendance,
+        "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    })
+
+    print("✔ extracted:", attendance)
+
 # =========================================================
 # SAVE OUTPUT
 # =========================================================

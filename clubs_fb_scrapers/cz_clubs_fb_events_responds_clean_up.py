@@ -1,42 +1,48 @@
 import pandas as pd
 
-input_file ="/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_responds_daily.csv"
+input_file = "/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_responds_daily.csv"
 
 df = pd.read_csv(input_file)
 
-# Ensure string format
-df["extraction_datetime"] = df["extraction_datetime"].astype(str)
+# =========================================================
+# SAFETY: normalize key column first
+# =========================================================
+df["extraction_datetime"] = df["extraction_datetime"].fillna("").astype(str)
 
-# Split into date and time parts
+# Anything over 40 characters is almost certainly not a valid attendance string
+df.loc[df["attendance"].str.len() > 50, "attendance"] = "ERROR"
+# =========================================================
+# SPLIT DATE / TIME (SAFE)
+# =========================================================
+dt_split = df["extraction_datetime"].str.split("_", expand=True)
+
+
+# ensure both columns exist
+if dt_split.shape[1] < 2:
+    dt_split[1] = ""
+
 df["snapshot_date"] = pd.to_datetime(
-    df["extraction_datetime"].str.split("_").str[0],
+    dt_split[0],
     format="%Y-%m-%d",
     errors="coerce"
 ).dt.date
 
 df["snapshot_time"] = (
-    df["extraction_datetime"]
-    .str.split("_")
-    .str[1]
+    dt_split[1]
+    .fillna("")
+    .astype(str)
     .str.replace(r"(\d{2})(\d{2})(\d{2})", r"\1:\2:\3", regex=True)
 )
 
-# (optional) attendance extraction if still needed
-df["attendance_count"] = (
-    df["attendance"]
-    .astype(str)
-    .str.extract(r"(\d+)", expand=False)
-    .astype("Int64")
-)
-
-# ===== Extract attendance number =====
+# =========================================================
+# ATTENDANCE PARSER
+# =========================================================
 def parse_attendance(value):
     if pd.isna(value):
         return pd.NA
 
     text = str(value).strip().upper()
 
-    # Match: 23, 1.1K, 2K, 3.5M, etc.
     match = pd.Series([text]).str.extract(
         r'(\d+(?:\.\d+)?)\s*([KM]?)',
         expand=True
@@ -55,13 +61,11 @@ def parse_attendance(value):
 
     return int(round(number))
 
-df["attendance_count"] = (
-    df["attendance"]
-    .apply(parse_attendance)
-    .astype("Int64")
-)
-# ===== COLUMN ORDER CONFIG =====
-# Put your preferred order here
+df["attendance_count"] = df["attendance"].apply(parse_attendance).astype("Int64")
+
+# =========================================================
+# COLUMN ORDER
+# =========================================================
 column_order = [
     "url",
     "attendance",
@@ -70,15 +74,19 @@ column_order = [
     "snapshot_time"
 ]
 
-# Add any missing columns automatically (so script won't break)
 for col in df.columns:
     if col not in column_order:
         column_order.append(col)
 
 df = df[column_order]
-df = df.drop(columns=["extraction_datetime"])
-# ===== SAVE =====
-# Save output
+
+# drop only if exists (safer)
+if "extraction_datetime" in df.columns:
+    df = df.drop(columns=["extraction_datetime"])
+
+# =========================================================
+# SAVE
+# =========================================================
 output_file = "/home/deploy/data/scrapers/cz_clubs_fb_events/cz_clubs_fb_events_responds_daily_clean.csv"
 df.to_csv(output_file, index=False)
 

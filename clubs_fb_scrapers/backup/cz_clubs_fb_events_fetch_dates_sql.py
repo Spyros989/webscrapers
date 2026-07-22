@@ -1,15 +1,20 @@
+from email.mime import text
 import time
 import random
-from sqlalchemy import create_engine, text
 import pandas as pd
+from sqlalchemy import create_engine, text
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 import undetected_chromedriver as uc
 from pathlib import Path
 from datetime import datetime
 import os 
 from dotenv import load_dotenv
 
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+load_dotenv()
+# =========================================================
+# CONFIG
+# =========================================================
 os.system("pkill -f chromedriver")
 os.system("pkill -f chrome")
 # =========================================================
@@ -40,20 +45,21 @@ engine = create_engine(
 
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_responds_daily.csv"
-
+OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_fetch_dates.csv"
+#cz_clubs_fb_events_dates_20260610.csv
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
     print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
 # ----------------------------
-# LOAD EVENT URLs FROM POSTGRES
+# LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
 query = text("""
-    select distinct event_url from cz_clubs_fb_events_daily ccfed
-join cz_clubs_fb_events_dates_clean ccfedc on ccfed.event_url=ccfedc.url
-where ccfedc.status = 'ok' and cast(ccfedc.event_date as date) >=date(now())  
-    """)
+        select distinct ccfed.event_url ,ccfedc.status,ccfedc.event_date  
+        from cz_clubs_fb_events_daily ccfed 
+        left join cz_clubs_fb_events_dates_clean ccfedc on ccfed.event_url=ccfedc.url 
+        where ccfedc.event_date is null and ccfedc.status is null
+        """)
 
 with engine.connect() as conn:
     df = pd.read_sql(query, conn)
@@ -64,21 +70,18 @@ print(f"Loaded {len(df)} urls from Postgres")
 # =========================================================
 # CHROME SETUP
 # =========================================================
-def create_driver():
-    options = uc.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--remote-debugging-port=9222")
+options = uc.ChromeOptions()
 
-    options.binary_location = "/snap/bin/chromium"
-    driver = uc.Chrome(options=options, version_main=149)
-    driver.set_page_load_timeout(30)
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+options.add_argument("--remote-debugging-port=9222")
+options.binary_location = "/snap/bin/chromium"
 
-    return driver
-driver = create_driver()
+driver = uc.Chrome(options=options, version_main=149)
+
 # =========================================================
 # STORAGE
 # =========================================================
@@ -87,71 +90,55 @@ results = []
 # =========================================================
 # LOOP URLS
 # =========================================================
-
 for index, row in df.iterrows():
 
     url = row["event_url"]
 
-    print("\n" + "=" * 80)
-    print(f"Processing: {url}")
+    print(f"\nProcessing: {url}")
 
-    attendance = None
-    if index % 5 == 0 and index != 0:
-        print("Restarting Chrome to prevent freeze...")
-        try:
-    	    driver.quit()
-        except:
-            pass
-        driver = create_driver()
     try:
         driver.get(url)
-        print("Page loaded")
+        time.sleep(random.uniform(5, 8))
 
-        # optional delay (helps FB finish rendering)
-        time.sleep(random.uniform(2, 5))
-
-        print("Searching spans...")
-
+        # =====================================================
+        # DATE EXTRACTION ONLY
+        # =====================================================
+        date = None
         spans = driver.find_elements(By.TAG_NAME, "span")
 
         for s in spans:
             txt = s.text.strip()
 
-            if "people responded" in txt.lower():
-                attendance = txt
+            if any(month in txt.lower() for month in [
+                "january","february","march","april","may","june",
+                "july","august","september","october","november","december"
+            ]) and ("pm" in txt.lower() or "am" in txt.lower() or "–" in txt):
+                date = txt
                 break
 
-        results.append({
-            "url": url,
-            "attendance": attendance,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-
-        print("✔ extracted:", attendance)
-
-    except TimeoutException:
-        print(f"Timeout loading {url}")
+        # fallback
+        if not date:
+            for s in spans:
+                txt = s.text.strip()
+                if "2026" in txt:
+                    date = txt
+                    break
 
         results.append({
             "url": url,
-            "attendance": None,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "error": "timeout"
+            "date": date
         })
 
-        continue
+        print("✔ extracted, date")
 
     except Exception as e:
         print("ERROR:", e)
 
         results.append({
             "url": url,
-            "attendance": None,
-            "extraction_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "error": str(e)
+            "date": None
         })
 
-        continue
 # =========================================================
 # SAVE OUTPUT
 # =========================================================
