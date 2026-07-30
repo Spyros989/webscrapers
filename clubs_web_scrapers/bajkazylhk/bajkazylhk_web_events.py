@@ -3,17 +3,20 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-
-
-URL = "https://bajkazylhk.cz/akce"
-BASE_URL = "https://bajkazylhk.cz"
-
-# safer path handling
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "bajkazylhk"
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_web_events/bajkazylhk")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
 OUTPUT_FILE = OUTPUT_DIR / "bajkazylhk_events.csv"
 
+# ----------------------------
+# PROJECT CONFIG
+# ----------------------------
+URL = "https://bajkazylhk.cz/akce"
+BASE_URL = "https://bajkazylhk.cz"
 with sync_playwright() as p:
 
     browser = p.chromium.launch(headless=True)
@@ -62,12 +65,16 @@ for event in events:
 # Create dataframe
 df = pd.DataFrame(results)
 
-# Save CSV
+# ----------------------------
+# EXPORT FILE (CSV)
+# ----------------------------
 df.to_csv(
     OUTPUT_FILE,
     index=False,
     encoding="utf-8-sig"
 )
-
-print(f"Saved {len(df)} events")
+# ----------------------------
+# END MESSAGE
+# ----------------------------
+print(f"Saved {len(df)} events from bajkazylhk.cz")
 print(OUTPUT_FILE)
