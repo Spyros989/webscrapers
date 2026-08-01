@@ -1,8 +1,14 @@
-
 import subprocess
 import sys
 import time
 from datetime import datetime
+from pathlib import Path
+
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+PROJECT_DIR = HOME / "webscrapers" / "clubs_web_scrapers" / "bajkazylhk"
 
 # =========================================================
 # CONFIG
@@ -28,7 +34,7 @@ for script in scripts:
 		datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 	result = subprocess.run(
 		["python3", script],
-        	cwd="/home/deploy/webscrapers/clubs_web_scrapers/bajkazylhk",
+        	cwd=PROJECT_DIR
 	)
 	script_end = time.time()
 	duration = script_end - script_start
