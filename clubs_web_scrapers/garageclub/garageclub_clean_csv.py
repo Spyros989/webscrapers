@@ -2,8 +2,13 @@ import pandas as pd
 import re
 from pathlib import Path
 
-INPUT_FILE = Path("/home/deploy/data/scrapers/garageclub/garageclub.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/garageclub/garageclub_events_edited.csv")
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "garageclub"
+INPUT_FILE = DATA_DIR / "garageclub.csv"
+OUTPUT_FILE = DATA_DIR / "garageclub_events_edited.csv"
 
 # load CSV
 df = pd.read_csv(INPUT_FILE)

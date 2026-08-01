@@ -7,8 +7,12 @@ from datetime import datetime
 URL = "https://www.kabinetmuz.cz/program"
 BASE_URL = "https://www.kabinetmuz.cz"
 
-# safer path handling
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/kabinet_muz")
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "kabinet_muz"
+OUTPUT_DIR=DATA_DIR
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_FILE = OUTPUT_DIR / "kabinet_muz_events_daily.csv"

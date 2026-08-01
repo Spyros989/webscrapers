@@ -1,13 +1,13 @@
 import pandas as pd
 import re
 from pathlib import Path
-
-# =========================
-# FILE PATHS
-# =========================
-
-INPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_daily.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/kabinet_muz/kabinet_muz_events_daily_clean.csv")
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "kabinet_muz"
+INPUT_FILE = DATA_DIR / "kabinet_muz_events_daily.csv"
+OUTPUT_FILE = DATA_DIR /"kabinet_muz_events_daily_clean.csv"
 
 # =========================
 # DATA RULES

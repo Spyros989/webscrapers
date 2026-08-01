@@ -1,21 +1,20 @@
-
 import subprocess
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
+
 # ----------------------------
 # PATH CONFIG
 # ----------------------------
 HOME = Path.home()
-PROJECT_DIR = HOME / "webscrapers" / "clubs_web_scrapers" / "garageclub"
+PROJECT_DIR = HOME / "webscrapers" / "clubs_web_scrapers"
 
-# =========================================================
-# CONFIG
-# =========================================================
 scripts = [
-"web_events_garageclub.py"
-,"garageclub_clean_csv.py"
+"bajkazylhk/run_bajkazylhk_pipeline.py"
+,"garageclub/run_garageclub_pipeline.py"
+,"kabinetmuz/run_kabinetmuz_pipeline.py"
+,"mcfabrika/run_mcfabrika_pipeline.py"
 ]
 
 

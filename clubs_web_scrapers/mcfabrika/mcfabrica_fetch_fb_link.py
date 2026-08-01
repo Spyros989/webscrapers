@@ -4,13 +4,13 @@ import pandas as pd
 import time
 from pathlib import Path
 
-
-# =========================
-# FILE PATHS
-# =========================
-
-INPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika/mcfabrika_events_daily_clean.csv")
-OUTPUT_FILE = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika/mcfabrika_events_daily_clean_fb_links.csv")
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
+INPUT_FILE = DATA_DIR / "mcfabrika_events_daily_clean.csv"
+OUTPUT_FILE = DATA_DIR / "mcfabrika_events_daily_clean_fb_links.csv"
 
 # LOAD CSV
 df = pd.read_csv(INPUT_FILE)

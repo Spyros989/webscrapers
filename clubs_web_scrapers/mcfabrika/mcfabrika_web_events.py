@@ -4,14 +4,20 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 
-BASE_URL = "https://www.mcfabrika.cz"
-CALENDAR_URL = "https://www.mcfabrika.cz/kalendar-akci/2026"
-
-# safer path handling
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_web_events/mcfabrika")
+# ----------------------------
+# PATH CONFIG
+# ----------------------------
+HOME = Path.home()
+DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
+OUTPUT_DIR=DATA_DIR
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events_daily.csv"
+
+
+BASE_URL = "https://www.mcfabrika.cz"
+CALENDAR_URL = "https://www.mcfabrika.cz/kalendar-akci/2026"
+
 results = []
 
 with sync_playwright() as p:
