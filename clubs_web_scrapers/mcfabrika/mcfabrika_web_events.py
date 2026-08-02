@@ -11,8 +11,7 @@ HOME = Path.home()
 DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
 OUTPUT_DIR=DATA_DIR
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events_daily.csv"
+OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events.csv"
 
 
 BASE_URL = "https://www.mcfabrika.cz"

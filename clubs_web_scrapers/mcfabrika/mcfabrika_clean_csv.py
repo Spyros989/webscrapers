@@ -7,8 +7,8 @@ from pathlib import Path
 # ----------------------------
 HOME = Path.home()
 DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
-INPUT_FILE = DATA_DIR / "mcfabrika_events_daily.csv"
-OUTPUT_FILE = DATA_DIR / "mcfabrika_events_daily_clean.csv"
+INPUT_FILE = DATA_DIR / "mcfabrika_events.csv"
+OUTPUT_FILE = DATA_DIR / "mcfabrika_events_clean.csv"
 
 
 # LOAD CSV
@@ -64,15 +64,21 @@ df[["sql_date", "event_time"]] = df.apply(
     axis=1
 )
 
+# RENAME TO STANDARD COLUMN NAMES
+df = df.rename(columns={
+    "event_name": "artist",
+    "web_link": "link"
+})
+
+
 # KEEP FINAL COLUMNS
 df = df[[
     "sql_date",
-    "event_time",
-    "event_name",
-    "web_link",
-    "extraction_datetime"
+    "artist",
+    "link",
+    "extraction_datetime",
+    "event_time"
 ]]
-
 # SAVE CLEAN CSV
 df.to_csv(
     OUTPUT_FILE,

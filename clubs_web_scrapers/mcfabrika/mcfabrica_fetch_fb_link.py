@@ -9,14 +9,14 @@ from pathlib import Path
 # ----------------------------
 HOME = Path.home()
 DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
-INPUT_FILE = DATA_DIR / "mcfabrika_events_daily_clean.csv"
-OUTPUT_FILE = DATA_DIR / "mcfabrika_events_daily_clean_fb_links.csv"
+INPUT_FILE = DATA_DIR / "mcfabrika_events_clean.csv"
+OUTPUT_FILE = DATA_DIR / "mcfabrika_events_clean_fb_links.csv"
 
 # LOAD CSV
 df = pd.read_csv(INPUT_FILE)
 
 # NEW COLUMN
-df["event_url"] = ""
+df["facebook_event"] = ""
 
 with sync_playwright() as p:
 
@@ -26,7 +26,7 @@ with sync_playwright() as p:
 
     for idx, row in df.iterrows():
 
-        url = row["web_link"]
+        url = row["link"]
 
         print(f"\nChecking: {url}")
 
@@ -64,7 +64,7 @@ with sync_playwright() as p:
                         fb_link = href
                         break
 
-            df.at[idx, "event_url"] = fb_link
+            df.at[idx, "facebook_event"] = fb_link
 
             if fb_link:
                 print("FOUND FB EVENT!")
@@ -81,6 +81,7 @@ with sync_playwright() as p:
     browser.close()
 
 # SAVE FINAL CSV
+df = df.drop(columns=["event_time"], errors="ignore")
 df.to_csv(
     OUTPUT_FILE,
     index=False,
