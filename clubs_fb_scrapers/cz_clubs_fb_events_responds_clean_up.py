@@ -79,7 +79,7 @@ for col in df.columns:
         column_order.append(col)
 
 df = df[column_order]
-
+df = df.drop(columns=["error"], errors="ignore")
 # drop only if exists (safer)
 if "extraction_datetime" in df.columns:
     df = df.drop(columns=["extraction_datetime"])
