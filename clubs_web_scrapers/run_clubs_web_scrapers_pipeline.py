@@ -15,7 +15,7 @@ scripts = [
 ,"garageclub/run_garageclub_pipeline.py"
 ,"kabinetmuz/run_kabinetmuz_pipeline.py"
 ,"mcfabrika/run_mcfabrika_pipeline.py"
-]
+,"load_pipeline_sql.py"]
 
 
 print("=" * 80)
