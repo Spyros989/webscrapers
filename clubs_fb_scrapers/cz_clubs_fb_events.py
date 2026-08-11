@@ -10,8 +10,17 @@ from pathlib import Path
 import time
 import os 
 from dotenv import load_dotenv
+import undetected_chromedriver as uc
+from selenium.common.exceptions import TimeoutException
 
-env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+HOME = Path.home()
+env_path = (
+	HOME
+	/"webscrapers"
+	/"bands_fb_scrapers"
+	/"ma_bands_fb_scrapers"
+	/".env"
+)
 load_dotenv()
 
 print("Loading .env from:", env_path)
@@ -21,7 +30,7 @@ load_dotenv(dotenv_path=env_path)
 print("DB_HOST after load:", os.getenv("DB_HOST"))
 
 # ----------------------------
-# CONFIG
+# ENVIRONMENT VARIABLES CONFIG
 # ----------------------------
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
@@ -55,33 +64,44 @@ with engine.connect() as conn:
 
 print(f"Loaded {len(df_clubs)} clubs from Postgres")
 
-# ----------------------------
-# SELENIUM SETUP
-# ----------------------------
-options = Options()
-options.add_argument("--headless=new")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--window-size=1920,1080")
-options.binary_location = "/snap/bin/chromium"
-options.add_argument("--remote-debugging-port=9222")
-driver = webdriver.Chrome(options=options)
+# =========================================================
+# CHROME SETUP
+# =========================================================
+def create_driver():
+    options = uc.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--remote-debugging-port=9222")
+    options.binary_location = "/snap/bin/chromium"
+    driver = uc.Chrome(options=options, version_main=149)
+    driver.set_page_load_timeout(30)
+    return driver
+driver = create_driver()
 
 all_events = []
 seen = set()
 
 # ----------------------------
-# SCRAPE EACH BAND PAGE
+# SCRAPE EACH CLUB PAGE
 # ----------------------------
-for _, row in df_clubs.iterrows():
+for index, row in df_clubs.iterrows():
     club_name = row["club_name"]
     url = row["facebook_events_current"]
 
     if not url:
         continue
 
-    print(f"Scraping: {club_name}")
-
+    print(f"\nProcessing: {club_name}")
+    if index % 5 == 0 and index != 0:
+        print("Restarting Chrome to prevent freeze...")
+        try:
+            driver.quit()
+        except:
+            pass
+        driver = create_driver()
     try:
         driver.get(url)
 
@@ -120,7 +140,6 @@ for _, row in df_clubs.iterrows():
 
     except Exception as ex:
         print(f"Failed club {club_name}: {ex}")
-
     time.sleep(2)  # small delay to avoid FB blocking
 
 driver.quit()
