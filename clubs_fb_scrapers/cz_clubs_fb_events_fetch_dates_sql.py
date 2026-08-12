@@ -47,7 +47,6 @@ engine = create_engine(
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_fetch_dates.csv"
-#cz_clubs_fb_events_dates_20260610.csv
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
