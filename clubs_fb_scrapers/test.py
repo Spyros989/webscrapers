@@ -10,20 +10,10 @@ from pathlib import Path
 import time
 import os 
 from dotenv import load_dotenv
-import undetected_chromedriver as uc
-from selenium.common.exceptions import TimeoutException
+import tempfile
 
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
-
-HOME = Path.home()
-env_path = (
-	HOME
-	/"webscrapers"
-	/"bands_fb_scrapers"
-	/"ma_bands_fb_scrapers"
-	/".env"
-)
+chrome_profile = tempfile.mkdtemp(prefix="fb_scraper_")
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
 load_dotenv()
 
 print("Loading .env from:", env_path)
@@ -33,7 +23,7 @@ load_dotenv(dotenv_path=env_path)
 print("DB_HOST after load:", os.getenv("DB_HOST"))
 
 # ----------------------------
-# ENVIRONMENT VARIABLES CONFIG
+# CONFIG
 # ----------------------------
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
@@ -49,7 +39,7 @@ OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 today = datetime.now().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / f"cz_bands_fb_events_daily_no_gpu.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"cz_clubs_fb_events_daily_old_one.csv"
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
@@ -58,54 +48,44 @@ with engine.connect() as conn:
 # LOAD BANDS FROM POSTGRES
 # ----------------------------
 query = text("""
-    select mcabfl.bandname,mcabfl.fb_event_upcoming  from ma_cz_active_bands_fb_links mcabfl where mcabfl.manual_check <>'X';
+    SELECT club_name, facebook_events_current
+    FROM cz_clubs_fb_links WHERE facebook_events_current IS NOT NULL;
     """)
 
 with engine.connect() as conn:
-    df_bands = pd.read_sql(query, conn)
+    df_clubs = pd.read_sql(query, conn)
 
-print(f"Loaded {len(df_bands)} bands from Postgres")
+print(f"Loaded {len(df_clubs)} clubs from Postgres")
 
-# =========================================================
-# CHROME SETUP
-# =========================================================
-def create_driver():
-    options = uc.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--remote-debugging-port=9222")
-    options.binary_location = "/snap/bin/chromium"
-    driver = uc.Chrome(options=options, version_main=149)
-    driver.set_page_load_timeout(30)
-    return driver
-driver = create_driver()
+# ----------------------------
+# SELENIUM SETUP
+# ----------------------------
+options = Options()
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--window-size=1920,1080")
+options.binary_location = "/snap/bin/chromium"
+options.add_argument("--remote-debugging-port=9222")
+options.add_argument(f"--user-data-dir={chrome_profile}")
+driver = webdriver.Chrome(options=options)
+
 
 all_events = []
 seen = set()
 
 # ----------------------------
-# SCRAPE EACH CLUB PAGE
+# SCRAPE EACH BAND PAGE
 # ----------------------------
-for index, row in df_bands.iterrows():
-    band_name = row["bandname"]
-    url = row["fb_event_upcoming"]
+for _, row in df_clubs.iterrows():
+    club_name = row["club_name"]
+    url = row["facebook_events_current"]
 
     if not url:
         continue
 
-    print(f"\nProcessing: {band_name}")
-    if index % 5 == 0 and index != 0:
-        print("Restarting Chrome to prevent freeze...")
-        try:
-            driver.quit()
-        except:
-            pass
-#		os.system("pkill -f chromedriver")
-#		os.system("pkill -f chrome")
-        driver = create_driver()
+    print(f"Scraping: {club_name}")
+
     try:
         driver.get(url)
 
@@ -133,7 +113,7 @@ for index, row in df_bands.iterrows():
                 seen.add(link)
 
                 all_events.append({
-                    "band_name": band_name,
+                    "club_name": club_name,
                     "event_name": text,
                     "event_url": link,
                     "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -143,7 +123,8 @@ for index, row in df_bands.iterrows():
                 print("Event error:", ex)
 
     except Exception as ex:
-        print(f"Failed band {band_name}: {ex}")
+        print(f"Failed club {club_name}: {ex}")
+
     time.sleep(2)  # small delay to avoid FB blocking
 
 driver.quit()

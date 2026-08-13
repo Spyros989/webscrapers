@@ -12,6 +12,11 @@ import os
 from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
+import tempfile
+import shutil
+import atexit
+
+
 
 HOME = Path.home()
 env_path = (
@@ -67,17 +72,31 @@ print(f"Loaded {len(df_clubs)} clubs from Postgres")
 # =========================================================
 # CHROME SETUP
 # =========================================================
+chrome_profiles = []
+
 def create_driver():
     options = uc.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-#    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("--remote-debugging-port=9222")
+#    options.add_argument("--remote-debugging-port=9222")
     options.binary_location = "/snap/bin/chromium"
+
+    # Use a completely fresh Chrome profile
+    profile_dir = tempfile.mkdtemp(prefix="fb_scraper_chrome_")
+    chrome_profiles.append(profile_dir)
+
+    print("Chrome profile:", profile_dir)
+
+    options.add_argument(f"--user-data-dir={profile_dir}")
+
+
     driver = uc.Chrome(options=options, version_main=149)
     driver.set_page_load_timeout(30)
+
+
     return driver
 driver = create_driver()
 
