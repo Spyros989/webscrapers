@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 from pathlib import Path
 import time
-import os 
+import os
 from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
@@ -93,12 +93,29 @@ def create_driver():
     options.add_argument(f"--user-data-dir={profile_dir}")
 
 
-    driver = uc.Chrome(options=options, version_main=149)
+    driver = uc.Chrome(options=options, version_main=151)
     driver.set_page_load_timeout(30)
 
 
     return driver
 driver = create_driver()
+
+# =========================================================
+# CLEANUP TEMPORARY CHROME PROFILES
+# =========================================================
+
+def cleanup_profiles():
+
+    print("Cleaning Chrome profiles...")
+
+    for profile in chrome_profiles:
+        try:
+            shutil.rmtree(profile, ignore_errors=True)
+        except Exception:
+            pass
+
+
+atexit.register(cleanup_profiles)
 
 all_events = []
 seen = set()
@@ -161,8 +178,12 @@ for index, row in df_clubs.iterrows():
         print(f"Failed club {club_name}: {ex}")
     time.sleep(2)  # small delay to avoid FB blocking
 
-driver.quit()
+try:
+    driver.quit()
+except Exception:
+    pass
 
+driver = create_driver()
 # ----------------------------
 # SAVE OUTPUT
 # ----------------------------

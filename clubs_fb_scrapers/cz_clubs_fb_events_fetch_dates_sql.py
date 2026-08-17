@@ -78,7 +78,7 @@ def create_driver():
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--remote-debugging-port=9222")
     options.binary_location = "/snap/bin/chromium"
-    driver = uc.Chrome(options=options, version_main=149)
+    driver = uc.Chrome(options=options, version_main=151)
     driver.set_page_load_timeout(30)
     return driver
 driver = create_driver()
@@ -137,7 +137,7 @@ for index, row in df.iterrows():
             "date": date
         })
 
-        print("✔ extracted, date")
+        print("✔ extracted ", date)
     except TimeoutException:
         print(f"Timeout loading {url}")
     except Exception as e:

@@ -8,13 +8,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 from pathlib import Path
 import time
-import os 
+import os
 from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
+import tempfile
+import shutil
+import atexit
 
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
+
 
 HOME = Path.home()
 env_path = (
@@ -49,7 +51,7 @@ OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 today = datetime.now().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / f"cz_bands_fb_events_daily_no_gpu.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"cz_bands_fb_events_daily.csv"
 
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
@@ -58,17 +60,18 @@ with engine.connect() as conn:
 # LOAD BANDS FROM POSTGRES
 # ----------------------------
 query = text("""
-    select mcabfl.bandname,mcabfl.fb_event_upcoming  from ma_cz_active_bands_fb_links mcabfl where mcabfl.manual_check <>'X';
-    """)
+    select mcabfl.bandname,mcabfl.fb_event_upcoming  from ma_cz_active_bands_fb_links mcabfl where mcabfl.manual_check<>'X' """)
 
 with engine.connect() as conn:
     df_bands = pd.read_sql(query, conn)
 
-print(f"Loaded {len(df_bands)} bands from Postgres")
+print(f"Loaded {len(df_bands)} clubs from Postgres")
 
 # =========================================================
 # CHROME SETUP
 # =========================================================
+chrome_profiles = []
+
 def create_driver():
     options = uc.ChromeOptions()
     options.add_argument("--headless=new")
@@ -76,12 +79,41 @@ def create_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("--remote-debugging-port=9222")
+#    options.add_argument("--remote-debugging-port=9222")
     options.binary_location = "/snap/bin/chromium"
-    driver = uc.Chrome(options=options, version_main=151)
+
+    # Use a completely fresh Chrome profile
+    profile_dir = tempfile.mkdtemp(prefix="fb_scraper_chrome_")
+    chrome_profiles.append(profile_dir)
+
+    print("Chrome profile:", profile_dir)
+
+    options.add_argument(f"--user-data-dir={profile_dir}")
+
+
+    driver = uc.Chrome(options=options, version_main=149)
     driver.set_page_load_timeout(30)
+
+
     return driver
 driver = create_driver()
+
+# =========================================================
+# CLEANUP TEMPORARY CHROME PROFILES
+# =========================================================
+
+def cleanup_profiles():
+
+    print("Cleaning Chrome profiles...")
+
+    for profile in chrome_profiles:
+        try:
+            shutil.rmtree(profile, ignore_errors=True)
+        except Exception:
+            pass
+
+
+atexit.register(cleanup_profiles)
 
 all_events = []
 seen = set()
@@ -103,8 +135,6 @@ for index, row in df_bands.iterrows():
             driver.quit()
         except:
             pass
-#		os.system("pkill -f chromedriver")
-#		os.system("pkill -f chrome")
         driver = create_driver()
     try:
         driver.get(url)
@@ -146,8 +176,12 @@ for index, row in df_bands.iterrows():
         print(f"Failed band {band_name}: {ex}")
     time.sleep(2)  # small delay to avoid FB blocking
 
-driver.quit()
+try:
+    driver.quit()
+except Exception:
+    pass
 
+driver = create_driver()
 # ----------------------------
 # SAVE OUTPUT
 # ----------------------------
