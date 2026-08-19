@@ -11,26 +11,29 @@ from datetime import datetime
 import os 
 from dotenv import load_dotenv
 
-env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+# =========================================================
+# CONFIG
+# =========================================================
+timestamp = datetime.now().strftime("%Y-%m-%d")
+HOME = Path.home()
+env_path = (
+	HOME
+	/"webscrapers"
+	/"bands_fb_scrapers"
+	/"ma_bands_fb_scrapers"
+	/".env"
+)
 load_dotenv()
 # =========================================================
 # CONFIG
 # =========================================================
 os.system("pkill -f chromedriver")
 os.system("pkill -f chrome")
-# =========================================================
-# CONFIG
-# =========================================================
-timestamp = datetime.now().strftime("%Y-%m-%d")
-env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
-load_dotenv()
+
 
 print("Loading .env from:", env_path)
-
 load_dotenv(dotenv_path=env_path)
-
 print("DB_HOST after load:", os.getenv("DB_HOST"))
-
 # ----------------------------
 # CONFIG
 # ----------------------------
