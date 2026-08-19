@@ -47,7 +47,7 @@ engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_bands_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 today = datetime.now().strftime("%Y-%m-%d")
@@ -91,7 +91,7 @@ def create_driver():
     options.add_argument(f"--user-data-dir={profile_dir}")
 
 
-    driver = uc.Chrome(options=options, version_main=149)
+    driver = uc.Chrome(options=options, version_main=151)
     driver.set_page_load_timeout(30)
 
 
