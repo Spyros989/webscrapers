@@ -6,9 +6,17 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
-load_dotenv()
-
+# =========================================================
+# PATH CONFIG
+# =========================================================
+HOME = Path.home()
+env_path = (
+	HOME
+	/"webscrapers"
+	/"bands_fb_scrapers"
+	/"ma_bands_fb_scrapers"
+	/".env"
+)
 load_dotenv()
 load_dotenv(dotenv_path=env_path)
 
@@ -16,7 +24,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 df = pd.read_csv("/home/deploy/data/scrapers/cz_bands_fb_events/cz_bands_fb_events_daily_clean.csv")
 df['insert_date'] = pd.Timestamp.now()
 # =========================================================
-# CONFIG
+# VARIABLES CONFIG
 # =========================================================
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")

@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
 load_dotenv()
 
-load_dotenv()
 load_dotenv(dotenv_path=env_path)
 
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

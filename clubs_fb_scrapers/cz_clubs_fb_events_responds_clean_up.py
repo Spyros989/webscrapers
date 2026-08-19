@@ -9,7 +9,7 @@ df = pd.read_csv(input_file)
 # =========================================================
 df["extraction_datetime"] = df["extraction_datetime"].fillna("").astype(str)
 
-# Anything over 40 characters is almost certainly not a valid attendance string
+# Anything over 50 characters is almost certainly not a valid attendance string
 df.loc[df["attendance"].str.len() > 50, "attendance"] = "ERROR"
 # =========================================================
 # SPLIT DATE / TIME (SAFE)
