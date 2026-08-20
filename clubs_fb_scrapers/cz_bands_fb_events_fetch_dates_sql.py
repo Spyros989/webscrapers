@@ -53,7 +53,7 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
         select distinct cbfed.event_url
-        from cz_bands_fb_events_daily cbfed limit 300
+        from cz_bands_fb_events_daily cbfed
         """)
 
 with engine.connect() as conn:
