@@ -52,8 +52,10 @@ with engine.connect() as conn:
 # LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
 query = text("""
-        select distinct cbfed.event_url
-        from cz_bands_fb_events_daily cbfed
+        select distinct cbfed.event_url ,cbfedc.status,cbfedc.event_date  
+        from cz_bands_fb_events_daily cbfed 
+        left join cz_bands_fb_events_dates_clean cbfedc on cbfed.event_url=cbfedc.url 
+        where cbfedc.event_date is null and cbfedc.status is null
         """)
 
 with engine.connect() as conn:
