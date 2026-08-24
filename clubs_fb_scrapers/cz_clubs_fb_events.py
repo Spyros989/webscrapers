@@ -61,7 +61,7 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT club_name, facebook_events_current
-    FROM cz_clubs_fb_links WHERE facebook_events_current IS NOT NULL;
+    FROM dim_venues WHERE facebook_events_current IS NOT NULL;
     """)
 
 with engine.connect() as conn:

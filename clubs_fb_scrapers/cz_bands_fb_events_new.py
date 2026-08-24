@@ -119,7 +119,7 @@ all_events = []
 seen = set()
 
 # ----------------------------
-# SCRAPE EACH CLUB PAGE
+# SCRAPE EACH BAND PAGE
 # ----------------------------
 for index, row in df_bands.iterrows():
     band_name = row["bandname"]
@@ -174,7 +174,7 @@ for index, row in df_bands.iterrows():
 
     except Exception as ex:
         print(f"Failed band {band_name}: {ex}")
-    time.sleep(2)  # small delay to avoid FB blocking
+    time.sleep(5)  # small delay to avoid FB blocking
 
 try:
     driver.quit()
