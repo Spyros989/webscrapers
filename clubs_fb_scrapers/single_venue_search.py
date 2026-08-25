@@ -1,0 +1,261 @@
+import pandas as pd
+from sqlalchemy import create_engine, text
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from datetime import datetime
+from pathlib import Path
+import time
+import os
+from dotenv import load_dotenv
+import undetected_chromedriver as uc
+from selenium.common.exceptions import TimeoutException
+import tempfile
+import shutil
+import atexit
+
+# =========================================================
+# KILL CHROMEDRIVER
+# =========================================================
+os.system("pkill -f chromedriver")
+os.system("pkill -f chrome")
+
+HOME = Path.home()
+env_path = (
+	HOME
+	/"webscrapers"
+	/"bands_fb_scrapers"
+	/"ma_bands_fb_scrapers"
+	/".env"
+)
+load_dotenv()
+
+print("Loading .env from:", env_path)
+
+load_dotenv(dotenv_path=env_path)
+
+print("DB_HOST after load:", os.getenv("DB_HOST"))
+
+# ----------------------------
+# ENVIRONMENT VARIABLES CONFIG
+# ----------------------------
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
+engine = create_engine(
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+today = datetime.now().strftime("%Y-%m-%d")
+OUTPUT_FILE = OUTPUT_DIR / f"venues_fb_events_daily.csv"
+
+with engine.connect() as conn:
+    print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
+    print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
+# ----------------------------
+# LOAD BANDS FROM POSTGRES
+# ----------------------------
+query = text("""
+    SELECT venue_id,club_name, facebook_events_current
+    FROM dim_venues WHERE facebook_events_current IS NOT NULL ORDER BY venue_id asc;
+    """)
+
+with engine.connect() as conn:
+    df_clubs = pd.read_sql(query, conn)
+
+print(f"Loaded {len(df_clubs)} clubs from Postgres")
+
+# =========================================================
+# CHROME SETUP
+# =========================================================
+chrome_profiles = []
+
+def create_driver():
+    options = uc.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+#    options.add_argument("--remote-debugging-port=9222")
+    options.binary_location = "/snap/bin/chromium"
+
+    # Use a completely fresh Chrome profile
+    profile_dir = tempfile.mkdtemp(prefix="fb_scraper_chrome_")
+    chrome_profiles.append(profile_dir)
+
+    print("Chrome profile:", profile_dir)
+
+    options.add_argument(f"--user-data-dir={profile_dir}")
+    driver = uc.Chrome(options=options, version_main=151)
+    driver.set_page_load_timeout(30)
+
+    return driver
+driver = create_driver()
+
+# =========================================================
+# CLEANUP TEMPORARY CHROME PROFILES
+# =========================================================
+
+def cleanup_profiles():
+
+    print("Cleaning Chrome profiles...")
+
+    for profile in chrome_profiles:
+        try:
+            shutil.rmtree(profile, ignore_errors=True)
+        except Exception:
+            pass
+
+
+atexit.register(cleanup_profiles)
+
+all_events = []
+seen = set()
+def handle_cookie_popup(driver):
+
+    cookie_texts = [
+        "Allow all cookies",
+        "Allow all",
+        "Accept all cookies",
+        "Accept all cookies",
+        "Only allow essential cookies",
+        "Decline optional cookies",
+    ]
+
+    for text in cookie_texts:
+
+        try:
+            buttons = driver.find_elements(
+                By.XPATH,
+                f"//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{text.lower()}')]"
+            )
+
+            for button in buttons:
+
+                if button.is_displayed() and button.is_enabled():
+
+                    print(f"Cookie popup detected → clicking: {text}")
+
+                    driver.execute_script(
+                        "arguments[0].click();",
+                        button
+                    )
+
+                    time.sleep(2)
+
+                    return True
+
+        except Exception:
+            pass
+
+    return False
+
+# ----------------------------
+# SCRAPE EACH CLUB PAGE
+# ----------------------------
+for index, row in df_clubs.iterrows():
+
+    club_name = row["club_name"]
+    url = row["facebook_events_current"]
+    venue_id = row["venue_id"]
+    if not url:
+        all_events.append({
+	    "venue_id": venue_id,
+            "club_name": club_name,
+            "event_name": "n/a",
+            "event_url": "n/a",
+            "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        })
+        continue
+
+    print(f"\nProcessing: {club_name}, id:{venue_id}")
+
+    if index % 5 == 0 and index != 0:
+        print("Restarting Chrome to prevent freeze...")
+
+        try:
+            driver.quit()
+        except:
+            pass
+
+        driver = create_driver()
+
+    try:
+        driver.get(url)
+        print("Page loaded")
+
+        handle_cookie_popup(driver)
+
+        wait = WebDriverWait(driver, 15)
+
+        wait.until(
+             EC.presence_of_all_elements_located(
+                 (By.XPATH, "//a[contains(@href, '/events/')]")
+                 )
+             )
+
+        event_elements = driver.find_elements(
+            By.XPATH,
+            "//a[contains(@href, '/events/')]"
+        )
+
+        for e in event_elements:
+            try:
+                text = e.text.strip()
+                link = e.get_attribute("href")
+
+                if not text or not link:
+                    continue
+
+                if link in seen:
+                    continue
+
+                seen.add(link)
+
+                all_events.append({
+		    "venue_id": venue_id,
+                    "club_name": club_name,
+                    "event_name": text,
+                    "event_url": link,
+                    "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                })
+
+            except Exception as ex:
+                print("Event error:", ex)
+
+    except Exception as ex:
+
+        print(f"Failed club {club_name}: {ex}")
+
+        all_events.append({
+	    "venue_id": venue_id,
+            "club_name": club_name,
+            "event_name": "n/a",
+            "event_url": "n/a",
+            "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        })
+
+    time.sleep(2)
+
+try:
+    driver.quit()
+except Exception:
+    pass
+
+driver = create_driver()
+# ----------------------------
+# SAVE OUTPUT
+# ----------------------------
+df_events = pd.DataFrame(all_events)
+df_events.to_csv(OUTPUT_FILE, index=False)
+
+print(f"Done. Saved {len(df_events)} events → {OUTPUT_FILE}")

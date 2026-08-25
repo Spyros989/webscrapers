@@ -14,7 +14,7 @@ load_dotenv()
 # =========================================================
 # CONFIG
 # =========================================================
-EVENT_URL = "https://www.facebook.com/events/1600064631100854/"
+EVENT_URL = "https://www.facebook.com/cargogallery/events"
 # =========================================================
 # CHROME SETUP
 # =========================================================
@@ -27,7 +27,7 @@ options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
 
 #driver = uc.Chrome(options=options)  # IMPORTANT: no version pin
-driver = uc.Chrome(options=options, version_main=149)
+driver = uc.Chrome(options=options, version_main=151)
 # =========================================================
 # LOAD PAGE
 # =========================================================
