@@ -12,9 +12,8 @@ import os
 from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
-import tempfile
-import shutil
-import atexit
+import subprocess
+import re
 
 # =========================================================
 # KILL CHROMEDRIVER
@@ -31,9 +30,12 @@ env_path = (
 	/".env"
 )
 load_dotenv()
+OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_FILE = OUTPUT_DIR / f"venues_fb_events_daily.csv"
+#today = datetime.now().strftime("%Y-%m-%d")
 
 print("Loading .env from:", env_path)
-
 load_dotenv(dotenv_path=env_path)
 
 print("DB_HOST after load:", os.getenv("DB_HOST"))
@@ -50,18 +52,14 @@ DB_NAME = os.getenv("DB_NAME")
 engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
-
-OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-today = datetime.now().strftime("%Y-%m-%d")
-OUTPUT_FILE = OUTPUT_DIR / f"venues_fb_events_daily.csv"
-
+# ----------------------------
+# CREATE ENGINE TO CONNECT TO POSTGRES
+# ----------------------------
 with engine.connect() as conn:
     print("DB NAME:", conn.execute(text("SELECT current_database()")).fetchone())
     print("SCHEMA SEARCH PATH:", conn.execute(text("SHOW search_path")).fetchone())
 # ----------------------------
-# LOAD BANDS FROM POSTGRES
+# LOAD CLUBS FROM POSTGRES
 # ----------------------------
 query = text("""
     SELECT venue_id,club_name, facebook_events_current
@@ -76,47 +74,65 @@ print(f"Loaded {len(df_clubs)} clubs from Postgres")
 # =========================================================
 # CHROME SETUP
 # =========================================================
-chrome_profiles = []
+
+SCRAPER_PROFILE = Path.home() / "fb_scraper_profile"
+
+
+def get_chromium_major_version():
+
+    output = subprocess.check_output(
+        ["/snap/bin/chromium", "--version"],
+        text=True
+    )
+
+    print("Chromium:", output.strip())
+
+    match = re.search(r"(\d+)\.", output)
+
+    if not match:
+        raise RuntimeError(
+            f"Could not determine Chromium version: {output}"
+        )
+
+    return int(match.group(1))
+
 
 def create_driver():
+
     options = uc.ChromeOptions()
+
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
-#    options.add_argument("--remote-debugging-port=9222")
+
+    # Persistent scraper profile
+    options.add_argument(
+        f"--user-data-dir={SCRAPER_PROFILE}"
+    )
+
     options.binary_location = "/snap/bin/chromium"
 
-    # Use a completely fresh Chrome profile
-    profile_dir = tempfile.mkdtemp(prefix="fb_scraper_chrome_")
-    chrome_profiles.append(profile_dir)
+    chrome_version = get_chromium_major_version()
 
-    print("Chrome profile:", profile_dir)
+    print("Chrome profile:", SCRAPER_PROFILE)
+    print("Chrome version:", chrome_version)
 
-    options.add_argument(f"--user-data-dir={profile_dir}")
-    driver = uc.Chrome(options=options, version_main=151)
+    driver = uc.Chrome(
+        options=options,
+        version_main=chrome_version
+    )
+
     driver.set_page_load_timeout(30)
 
     return driver
+
 driver = create_driver()
 
 # =========================================================
-# CLEANUP TEMPORARY CHROME PROFILES
+# RESULTS
 # =========================================================
-
-def cleanup_profiles():
-
-    print("Cleaning Chrome profiles...")
-
-    for profile in chrome_profiles:
-        try:
-            shutil.rmtree(profile, ignore_errors=True)
-        except Exception:
-            pass
-
-
-atexit.register(cleanup_profiles)
 
 all_events = []
 seen = set()
