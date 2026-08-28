@@ -4,18 +4,18 @@ import time
 from datetime import datetime
 
 # =========================================================
-# CONFIG
+# PY SCRIPTS CONFIG
 # =========================================================
 scripts = [
-"cz_clubs_fb_events.py"
-,"cz_clubs_fb_events_clean_up.py"
-,"cz_clubs_fb_events_clean_up_load_sql.py"
-,"cz_clubs_fb_events_fetch_dates_sql.py"
-,"cz_clubs_fb_events_fetch_dates_clean_up.py"
-,"cz_clubs_fb_events_fetch_dates_clean_up_load_sql.py"
-,"cz_clubs_fb_events_responds_sql.py"
-,"cz_clubs_fb_events_responds_clean_up.py"
-,"cz_clubs_fb_events_responds_clean_up_load_sql.py"
+"venues_fb_events.py"
+,"venues_fb_events_clean.py"
+,"venues_fb_events_clean_inject.py"
+,"venues_fb_events_fetch_dates.py"
+,"venues_fb_events_fetch_dates_clean.py"
+,"venues_fb_events_fetch_dates_clean_inject.py"
+,"venues_fb_events_responds.py"
+,"venues_fb_events_responds_clean.py"
+,"venues_fb_events_responds_clean_inject.py"
 ]
 
 
