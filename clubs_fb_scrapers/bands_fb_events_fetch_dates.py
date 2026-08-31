@@ -61,8 +61,17 @@ with engine.connect() as conn:
 # ----------------------------
 # LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
-query = text("""select * from dim_bands_fb_events_dates dbfed
-where dbfed.date is null;""")
+query = text("""select  
+        dbfe.band_id,
+        dbfe.event_url as url
+        from dim_bands_fb_events dbfe 
+        inner join dim_bands_fb_events_dates dbfed  
+        on dbfe.event_url=dbfed.url 
+        where dbfed.event_date is null 
+        and dbfed.status is null
+        and dbfe.event_url is not null
+       group by 1,2
+       order by 1 asc""")
 
 with engine.connect() as conn:
     df = pd.read_sql(query, conn)
