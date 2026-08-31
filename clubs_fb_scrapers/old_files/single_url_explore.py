@@ -5,7 +5,7 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 
 
-EVENT_URL = "https://www.facebook.com/events/1524752919146224/"
+EVENT_URL = "https://www.facebook.com/events/168101681310912/"
 
 
 # =========================================================
