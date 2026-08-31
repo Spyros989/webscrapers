@@ -14,7 +14,7 @@ os.system("pkill -f chrome")
 
 load_dotenv()
 
-EVENT_URL = "https://www.facebook.com/events/1018364380704878/"
+EVENT_URL = "https://www.facebook.com/events/1524752919146224/"
 
 # =========================================================
 # CHROME SETUP (Optimized for undetected)

@@ -61,10 +61,8 @@ with engine.connect() as conn:
 # ----------------------------
 # LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
-query = text("""select dbfe.band_id,dbfe.event_url 
-from dim_bands_fb_events dbfe 
-group by 1,2
-order by dbfe.band_id asc;""")
+query = text("""select * from dim_bands_fb_events_dates dbfed
+where dbfed.date is null;""")
 
 with engine.connect() as conn:
     df = pd.read_sql(query, conn)
@@ -140,7 +138,7 @@ results = []
 # =========================================================
 for index, row in df.iterrows():
 
-    url = row["event_url"]
+    url = row["url"]
     band_id = row["band_id"]
     print("\n" + "=" * 80)
     print(f"\nProcessing: {url}")
