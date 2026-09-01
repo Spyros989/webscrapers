@@ -50,7 +50,7 @@ OUTPUT_DIR.mkdir(
     exist_ok=True
 )
 
-OUTPUT_FILE = OUTPUT_DIR / "bands_fb_events_contents.csv"
+OUTPUT_FILE = OUTPUT_DIR / "bands_fb_events_contents_all.csv"
 
 print("Loading .env from:", env_path)
 
@@ -105,8 +105,7 @@ query = text("""
     SELECT
         dbfed.band_id,
         dbfed.url
-    FROM dim_bands_fb_events_dates dbfed
-    WHERE dbfed.date IS NULL limit 100;
+    FROM dim_bands_fb_events_dates dbfed;
 """)
 
 
