@@ -18,14 +18,6 @@ import re
 
 
 # =========================================================
-# KILL CHROMEDRIVER
-# =========================================================
-
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
-
-
-# =========================================================
 # CONFIG
 # =========================================================
 
@@ -303,7 +295,8 @@ for index, row in df.iterrows():
 # =========================================================
 
 driver.quit()
-
+time.sleep(2)
+driver = create_driver()
 
 out_df = pd.DataFrame(results)
 

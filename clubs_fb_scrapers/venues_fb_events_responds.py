@@ -58,10 +58,16 @@ with engine.connect() as conn:
 # LOAD EVENT URLs FROM POSTGRES
 # ----------------------------
 query = text("""
-    select distinct
-    dvfed.venue_id,
-    dvfed.url from dim_venues_fb_events_dates dvfed
-    where dvfed.status = 'ok' and cast(dvfed.event_date as date) >=date(now())""")
+select
+dvfec.venue_id
+,dvfec.event_url
+from dim_venues_fb_events dvfe
+inner join dim_venues_fb_events_contents dvfec
+on dvfec.event_url = dvfe.event_url
+and dvfec.venue_id = dvfe.venue_id
+where  status ='ok'
+and  cast(dvfec.event_date as date) >=date(now())
+group by dvfec.venue_id,dvfec.event_url""")
 
 with engine.connect() as conn:
     df = pd.read_sql(query, conn)
@@ -142,7 +148,7 @@ results = []
 
 for index, row in df.iterrows():
 
-    url = row["url"]
+    url = row["event_url"]
     venue_id = row["venue_id"]
 
     print("\n" + "=" * 80)
@@ -186,7 +192,7 @@ for index, row in df.iterrows():
 
         results.append({
             "venue_id": venue_id,
-            "url": url,
+            "event_url": url,
             "attendance": attendance,
             "extraction_datetime": datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -201,7 +207,7 @@ for index, row in df.iterrows():
 
         results.append({
             "venue_id": venue_id,
-            "url": url,
+            "event_url": url,
             "attendance": None,
             "extraction_datetime": datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -217,7 +223,7 @@ for index, row in df.iterrows():
 
         results.append({
             "venue_id": venue_id,
-            "url": url,
+            "event_url": url,
             "attendance": None,
             "extraction_datetime": datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
