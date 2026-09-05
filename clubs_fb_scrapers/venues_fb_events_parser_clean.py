@@ -5,9 +5,9 @@ import pandas as pd
 # CONFIG
 # =========================================================
 
-INPUT_FILE = "/home/deploy/data/scrapers/cz_bands_fb_events/bands_fb_events_contents_all_deltas.csv"
+INPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/venues_fb_events_contents.csv"
 
-OUTPUT_FILE = "/home/deploy/data/scrapers/cz_bands_fb_events/bands_fb_events_contents_all_deltas.csv_parsed.csv"
+OUTPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/venues_fb_events_contents_clean.csv"
 
 
 # =========================================================
@@ -70,8 +70,8 @@ df[["date", "title", "location"]] = df["visible_text"].apply(
 
 result = df[
     [
-        "band_id",
-        "url",
+        "venue_id",
+        "event_url",
         "date",
         "title",
         "location"

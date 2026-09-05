@@ -1,5 +1,5 @@
 import time
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,text
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
@@ -28,6 +28,9 @@ engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-df.to_sql("dim_venues_fb_events", engine, if_exists="append", index=False)
+df.to_sql("venues_fb_events_raw", engine, if_exists="append", index=False)
 
-print("Import complete")
+with engine.begin() as conn:
+    conn.execute(text("CALL refresh_dim_venues_fb_events()"))
+
+print("Import and refresh complete")

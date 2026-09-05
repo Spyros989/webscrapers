@@ -42,7 +42,7 @@ env_path = (
 load_dotenv()
 
 OUTPUT_DIR = Path(
-    "/home/deploy/data/scrapers/cz_bands_fb_events"
+    "/home/deploy/data/scrapers/cz_clubs_fb_events"
 )
 
 OUTPUT_DIR.mkdir(
@@ -50,7 +50,7 @@ OUTPUT_DIR.mkdir(
     exist_ok=True
 )
 
-OUTPUT_FILE = OUTPUT_DIR / "bands_fb_events_contents_all_deltas.csv"
+OUTPUT_FILE = OUTPUT_DIR / "venues_fb_events_contents.csv"
 
 print("Loading .env from:", env_path)
 
@@ -102,12 +102,16 @@ with engine.connect() as conn:
 # =========================================================
 
 query = text("""
-    SELECT
- a.band_id,
- a.event_url as url
-    FROM visible_text_test_all a 
-    where a.event_url is not null
-    and a.date is null;
+select 
+dvfec.venue_id
+,dvfec.event_url
+from dim_venues_fb_events dvfe
+inner join dim_venues_fb_events_contents dvfec 
+on dvfec.event_url = dvfe.event_url
+and dvfec.venue_id = dvfe.venue_id
+where dvfec.event_date is null
+and status is null
+order by dvfe.venue_id asc;
 """)
 
 
@@ -202,8 +206,8 @@ results = []
 
 for index, row in df.iterrows():
 
-    url = row["url"]
-    band_id = row["band_id"]
+    url = row["event_url"]
+    venue_id = row["venue_id"]
 
     print("\n" + "=" * 80)
     print(f"Processing: {url}")
@@ -254,8 +258,8 @@ for index, row in df.iterrows():
         # -------------------------------------------------
 
         results.append({
-            "band_id": band_id,
-            "url": url,
+            "venue_id": venue_id,
+            "event_url": url,
             "visible_text": visible_text
         })
 
@@ -274,8 +278,8 @@ for index, row in df.iterrows():
         )
 
         results.append({
-            "band_id": band_id,
-            "url": url,
+            "venue_id": venue_id,
+            "event_url": url,
             "visible_text": None
         })
 
@@ -288,8 +292,8 @@ for index, row in df.iterrows():
         )
 
         results.append({
-            "band_id": band_id,
-            "url": url,
+            "venue_id": venue_id,
+            "event_url": url,
             "visible_text": None
         })
 

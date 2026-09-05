@@ -62,17 +62,17 @@ with engine.connect() as conn:
 # LOAD EVENTS URLs FROM POSTGRES
 # ----------------------------
 query = text("""
-        select distinct 
-        dvfe.venue_id,
-        dvfe.event_url,
-        ccfedc.status,
-        ccfedc.event_date  
-        from dim_venues_fb_events dvfe 
-        left join cz_clubs_fb_events_dates_clean ccfedc 
-        on dvfe.event_url=ccfedc.url 
-        where ccfedc.event_date is null 
-        and ccfedc.status is null
-        and dvfe.event_url is not null
+        select 
+dvfec.venue_id
+,dvfec.event_url
+from dim_venues_fb_events dvfe
+inner join dim_venues_fb_events_contents dvfec 
+on dvfec.event_url = dvfe.event_url
+and dvfec.venue_id = dvfe.venue_id
+where dvfec.event_date is null
+and dvfec.status is null
+group by dvfec.venue_id,dvfec.event_url
+order by dvfec.venue_id asc;
         """)
 
 with engine.connect() as conn:

@@ -1,11 +1,16 @@
 import time
 from pathlib import Path
-
+import os
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 
+# =========================================================
+# KILL CHROMEDRIVER
+# =========================================================
+os.system("pkill -f chromedriver")
+os.system("pkill -f chrome")
 
-EVENT_URL = "https://www.facebook.com/events/168101681310912/"
+EVENT_URL = "https://www.facebook.com/events/1316059683990672/"
 
 
 # =========================================================
