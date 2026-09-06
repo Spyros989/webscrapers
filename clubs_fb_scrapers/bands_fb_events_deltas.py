@@ -15,12 +15,6 @@ from selenium.common.exceptions import TimeoutException
 import subprocess
 import re
 
-# =========================================================
-# KILL CHROMEDRIVER
-# =========================================================
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
-
 HOME = Path.home()
 env_path = (
 	HOME
@@ -32,7 +26,7 @@ env_path = (
 load_dotenv()
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_bands_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_FILE = OUTPUT_DIR / f"bands_fb_events.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"bands_fb_events_deltas.csv"
 
 print("Loading .env from:", env_path)
 load_dotenv(dotenv_path=env_path)
@@ -61,9 +55,16 @@ with engine.connect() as conn:
 # LOAD BANDS FROM POSTGRES
 # ----------------------------
 query = text("""
-    SELECT band_id,band_name, fb_url_events_current
-    FROM dim_bands WHERE manual_check <>'X' ORDER BY band_id asc;
-    """)
+select 
+dbfe.band_id
+,db.band_name 
+,db.fb_url_events_current 
+from dim_bands_fb_events dbfe 
+join dim_bands db on dbfe.band_id=db.band_id
+where cast(dbfe.insert_date as date) ='2026-09-06'
+and event_name is null
+group by 1,2,3
+order by 1 asc""")
 
 with engine.connect() as conn:
     df_bands = pd.read_sql(query, conn)

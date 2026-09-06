@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 os.system("pkill -f chromedriver")
 os.system("pkill -f chrome")
 
-EVENT_URL = "https://www.facebook.com/events/1316059683990672/"
+EVENT_URL = "https://www.facebook.com/events/1123093476847996/"
 
 
 # =========================================================

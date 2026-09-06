@@ -150,9 +150,9 @@ for index, row in df.iterrows():
 
     url = row["event_url"]
     venue_id = row["venue_id"]
-
+    counter = index +1
     print("\n" + "=" * 80)
-    print(f"Processing: {url}")
+    print(f"Processing: {url} , {counter} out of {len(df)}")
 
     attendance = None
 
