@@ -64,11 +64,11 @@ def parse_czech_date(text):
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 # Create SQL-friendly date column
-df["sql_date"] = df["date"].apply(parse_czech_date)
+df["event_date"] = df["date"].apply(parse_czech_date)
 
 # Keep only desired columns
-df = df[["sql_date", "artist", "link","extraction_datetime"]]
-
+df = df[["event_date", "event_name", "link","extraction_datetime"]]
+df["venue_id"]=24
 # Save cleaned CSV
 df.to_csv(
     OUTPUT_FILE,

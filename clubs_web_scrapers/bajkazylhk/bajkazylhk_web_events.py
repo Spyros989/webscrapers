@@ -57,7 +57,7 @@ for event in events:
 
     results.append({
         "date": date.get_text(strip=True),
-        "artist": title.get_text(strip=True),
+        "event_name": title.get_text(strip=True),
         "link": link,
         "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
     })
