@@ -55,20 +55,16 @@ with engine.connect() as conn:
 # LOAD BANDS FROM POSTGRES
 # ----------------------------
 query = text("""
-select 
-dbfe.band_id
-,db.band_name 
-,db.fb_url_events_current 
-from dim_bands_fb_events dbfe 
-join dim_bands db on dbfe.band_id=db.band_id
-where cast(dbfe.insert_date as date) ='2026-09-06'
-and event_name is null
-group by 1,2,3
-order by 1 asc""")
+select
+db.band_id
+,db.band_name
+,db.fb_url_events_current
+from dim_bands db
+inner join bands_fb_events_errors bfee on db.band_id = bfee.band_id""")
 
 with engine.connect() as conn:
     df_bands = pd.read_sql(query, conn)
-
+df_bands= df_bands.sample(frac=1).reset_index(drop=True)
 print(f"Loaded {len(df_bands)} bands from Postgres")
 
 # =========================================================

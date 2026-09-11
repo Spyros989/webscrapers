@@ -17,7 +17,7 @@ scripts = [
 ,"venues_fb_events_responds.py"
 ,"venues_fb_events_responds_clean.py"
 ,"venues_fb_events_responds_clean_inject.py"
-]
+,"venues_fb_events_errors.py"]
 
 
 print("=" * 80)
