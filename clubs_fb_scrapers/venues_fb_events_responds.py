@@ -67,6 +67,7 @@ on dvfec.event_url = dvfe.event_url
 and dvfec.venue_id = dvfe.venue_id
 where  status ='ok'
 and  cast(dvfec.event_date as date) >=date(now())
+and  cast(dvfec.event_date as date) <=date(now())+7
 group by dvfec.venue_id,dvfec.event_url""")
 
 with engine.connect() as conn:

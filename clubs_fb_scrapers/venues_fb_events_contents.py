@@ -90,16 +90,18 @@ with engine.connect() as conn:
 
 query = text("""
 select
-dvfec.venue_id
+dvfe.venue_id
+,dvfe.event_name
 ,dvfec.event_url
+,dvfec.event_date 
 from dim_venues_fb_events dvfe
 inner join dim_venues_fb_events_contents dvfec
 on dvfec.event_url = dvfe.event_url
-and dvfec.venue_id = dvfe.venue_id
+left join venues_url_ignore vui
+on dvfe.event_url=vui.url
 where dvfec.event_date is null
-and status is null
-group by dvfec.venue_id,dvfec.event_url
-order by dvfec.venue_id asc;""")
+and vui.url is null
+group by 1,2,3,4""")
 
 
 with engine.connect() as conn:
