@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from pathlib import Path
-
+from datetime import date,datetime
 # ----------------------------
 # PATH CONFIG
 # ----------------------------
@@ -10,7 +10,8 @@ DATA_DIR = HOME / "data" / "scrapers" / "cz_clubs_web_events" / "mcfabrika"
 INPUT_FILE = DATA_DIR / "mcfabrika_events.csv"
 OUTPUT_FILE = DATA_DIR / "mcfabrika_events_clean.csv"
 
-
+## Normalize today's date to midnight for an accurate comparison
+today = pd.Timestamp.now().normalize()
 # LOAD CSV
 df = pd.read_csv(INPUT_FILE)
 
@@ -47,40 +48,38 @@ def process_raw_date(row):
     # BUILD SQL DATE
     # -------------------------
 
-    sql_date = None
+    event_date = None
 
     if day:
 
         year = int(row["year"])
         month = int(row["month"])
 
-        sql_date = f"{year}-{month:02d}-{day:02d}"
+        event_date = f"{year}-{month:02d}-{day:02d}"
 
-    return pd.Series([sql_date, event_time])
+    return pd.Series([event_date, event_time])
 
 # CREATE NEW COLUMNS
-df[["sql_date", "event_time"]] = df.apply(
+df[["event_date", "event_time"]] = df.apply(
     process_raw_date,
     axis=1
 )
-
-# RENAME TO STANDARD COLUMN NAMES
-df = df.rename(columns={
-    "event_name": "artist",
-    "web_link": "link"
-})
-
-
+df["venue_id"]=13
 # KEEP FINAL COLUMNS
 df = df[[
-    "sql_date",
-    "artist",
-    "link",
-    "extraction_datetime",
+    "venue_id",
+    "event_date",
+    "event_name",
+    "entrance_fee",
+    "web_link",
     "event_time"
 ]]
+# Ensure event_date is in datetime format before filtering
+df["event_date"] = pd.to_datetime(df["event_date"],format="mixed")
+df_filtered = df[df["event_date"] >= today]
+
 # SAVE CLEAN CSV
-df.to_csv(
+df_filtered.to_csv(
     OUTPUT_FILE,
     index=False,
     encoding="utf-8-sig"

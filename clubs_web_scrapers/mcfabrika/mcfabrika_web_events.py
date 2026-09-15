@@ -13,9 +13,11 @@ OUTPUT_DIR=DATA_DIR
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / "mcfabrika_events.csv"
 
+now = datetime.now() # current date and time
+year = now.strftime("%Y")
 
 BASE_URL = "https://www.mcfabrika.cz"
-CALENDAR_URL = "https://www.mcfabrika.cz/kalendar-akci/2026"
+CALENDAR_URL = f"https://www.mcfabrika.cz/kalendar-akci/{year}"
 
 results = []
 
@@ -60,6 +62,14 @@ with sync_playwright() as p:
                     link = BASE_URL + href
                 else:
                     link = href
+                # ENTRANCE FEE
+
+                info_label = card.find(
+                    "span",
+                    class_="info-label"
+                )
+                text_fee = info_label.get_text(strip=True) if info_label else "N/A"
+
 
                 # TITLE
                 title = a.get_text(" ", strip=True)
@@ -79,11 +89,12 @@ with sync_playwright() as p:
                     )
 
                 results.append({
-                    "year": 2026,
+                    "year": year,
                     "month": month,
                     "raw_date": raw_date,
                     "event_name": title,
                     "web_link": link,
+		    "text_fee": text_fee,
                     "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
                 })
 
@@ -98,7 +109,22 @@ df = pd.DataFrame(results)
 
 # REMOVE DUPLICATES
 df = df.drop_duplicates()
+# Extract digits (and optional digits after spaces/dots) right before 'Kč'
+df['entrance_fee'] = df['text_fee'].str.extract(r'(\d[\d\s\.]*)\s*Kč', expand=False)
 
+# Optional: Clean up spaces or dots inside the extracted number string (e.g., "1 450" -> "1450")
+df['entrance_fee'] = df['entrance_fee'].str.replace(r'[\s\.]', '', regex=True)
+# ===== COLUMN ORDER CONFIG =====
+df.drop(columns=['text_fee'], inplace=True)
+column_order = [
+    "year",
+    "month",
+    "raw_date",
+    "event_name",
+    "entrance_fee",
+    "web_link"
+]
+df = df[column_order]
 # SAVE CSV
 df.to_csv(
     OUTPUT_FILE,

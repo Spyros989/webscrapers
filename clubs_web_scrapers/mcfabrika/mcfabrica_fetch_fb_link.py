@@ -16,7 +16,7 @@ OUTPUT_FILE = DATA_DIR / "mcfabrika_events_clean_fb_links.csv"
 df = pd.read_csv(INPUT_FILE)
 
 # NEW COLUMN
-df["facebook_event"] = ""
+df["event_url"] = ""
 
 with sync_playwright() as p:
 
@@ -26,7 +26,7 @@ with sync_playwright() as p:
 
     for idx, row in df.iterrows():
 
-        url = row["link"]
+        url = row["web_link"]
 
         print(f"\nChecking: {url}")
 
@@ -59,12 +59,12 @@ with sync_playwright() as p:
 
                     href = a.get("href", "")
 
-                    if "facebook.com" in href:
+                    if "facebook.com/events/" in href:
 
                         fb_link = href
                         break
 
-            df.at[idx, "facebook_event"] = fb_link
+            df.at[idx, "event_url"] = fb_link
 
             if fb_link:
                 print("FOUND FB EVENT!")
@@ -81,7 +81,7 @@ with sync_playwright() as p:
     browser.close()
 
 # SAVE FINAL CSV
-df = df.drop(columns=["event_time"], errors="ignore")
+
 df.to_csv(
     OUTPUT_FILE,
     index=False,
