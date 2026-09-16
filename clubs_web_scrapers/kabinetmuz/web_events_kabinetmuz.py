@@ -54,8 +54,8 @@ for element in soup.find_all(["h2", "a"]):
             results.append({
                 "month": current_month,
                 "date": date.get_text(strip=True),
-                "artist": title.get_text(strip=True),
-                "link": full_link,
+                "event_name": title.get_text(strip=True),
+                "web_link": full_link,
                 'extraction_datetime': datetime.now().strftime("%Y%m%d_%H%M%S")
             })
 

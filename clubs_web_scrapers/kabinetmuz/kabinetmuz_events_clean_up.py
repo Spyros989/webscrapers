@@ -58,15 +58,15 @@ def parse_date(month_text, date_text):
 # TRANSFORM DATA
 # =========================
 
-df["sql_date"] = df.apply(
+df["event_date"] = df.apply(
     lambda row: parse_date(row["month"], row["date"]),
     axis=1
 )
 
-df["sql_date"] = pd.to_datetime(df["sql_date"])
+df["event_date"] = pd.to_datetime(df["event_date"])
 
-df = df[["sql_date", "artist", "link","extraction_datetime"]]
-
+df = df[["event_date", "event_name", "web_link","extraction_datetime"]]
+df["venue_id"]=4
 # =========================
 # SAVE RESULT
 # =========================

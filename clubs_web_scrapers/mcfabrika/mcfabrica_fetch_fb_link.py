@@ -64,7 +64,7 @@ with sync_playwright() as p:
                         fb_link = href
                         break
 
-            df.at[idx, "event_url"] = fb_link
+            df.at[idx, "event_url"] = f"{fb_link}/" if fb_link else None
 
             if fb_link:
                 print("FOUND FB EVENT!")

@@ -62,7 +62,7 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT band_id,band_name, fb_url_events_current
-    FROM dim_bands WHERE manual_check <>'X' ORDER BY band_id asc;
+    FROM dim_bands WHERE manual_check <>'X' ORDER BY band_id asc limit 25;
     """)
 
 with engine.connect() as conn:
@@ -100,7 +100,7 @@ def create_driver():
 
     options = uc.ChromeOptions()
 
-    options.add_argument("--headless=new")
+#    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
@@ -117,18 +117,25 @@ def create_driver():
 
     print("Chrome profile:", SCRAPER_PROFILE)
     print("Chrome version:", chrome_version)
-
+    print("Chrome binary:", options.binary_location)
     driver = uc.Chrome(
         options=options,
         version_main=chrome_version
     )
-
+    print("Actual browser capabilities:")
+    print(driver.capabilities)
     driver.set_page_load_timeout(30)
 
     return driver
 
 driver = create_driver()
+driver.get("https://www.facebook.com/")
+time.sleep(5)
 
+print("CURRENT URL:", driver.current_url)
+print("TITLE:", driver.title)
+
+driver.quit()
 # =========================================================
 # RESULTS
 # =========================================================
@@ -219,7 +226,7 @@ for index, row in df_bands.iterrows():
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
-    time.sleep(2)
+    time.sleep(20)
 
 try:
     driver.quit()
