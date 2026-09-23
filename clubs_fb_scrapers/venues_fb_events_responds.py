@@ -175,7 +175,7 @@ for index, row in df.iterrows():
         print("Page loaded")
 
         # Give Facebook a moment to finish rendering
-        time.sleep(random.uniform(40, 60))
+        time.sleep(random.uniform(12, 24))
 
         print("Searching spans...")
 
