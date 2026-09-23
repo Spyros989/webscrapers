@@ -220,7 +220,7 @@ for index, row in df_clubs.iterrows():
         })
 
 #    time.sleep(20)
-    time.sleep(random.uniform(30, 60))
+    time.sleep(random.uniform(12, 24))
 try:
     driver.quit()
 except Exception:

@@ -228,7 +228,7 @@ for index, row in df.iterrows():
         print("Page loaded")
 
         time.sleep(
-            random.uniform(30, 60)
+            random.uniform(12, 24)
         )
 
 
