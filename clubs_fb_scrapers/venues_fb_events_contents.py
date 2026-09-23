@@ -92,10 +92,10 @@ query = text("""
 select
 dvfe.venue_id
 ,dvfe.event_name
-,dvfec.event_url
+,dvfe.event_url
 ,dvfec.event_date 
 from dim_venues_fb_events dvfe
-inner join dim_venues_fb_events_contents dvfec
+left join dim_venues_fb_events_contents dvfec
 on dvfec.event_url = dvfe.event_url
 left join venues_url_ignore vui
 on dvfe.event_url=vui.url
@@ -187,7 +187,7 @@ driver = create_driver()
 # =========================================================
 
 results = []
-
+counter = 0
 
 # =========================================================
 # LOOP URLS
@@ -197,13 +197,13 @@ for index, row in df.iterrows():
 
     url = row["event_url"]
     venue_id = row["venue_id"]
-
+    counter = counter + 1
     print("\n" + "=" * 80)
-    print(f"Processing: {url}")
+    print(f"Processing: {url} - {counter} out of {len(df)}")
 
 
     # Restart Chrome every 5 URLs
-    if index % 5 == 0 and index != 0:
+    if index % 10 == 0 and index != 0:
 
         print(
             "Restarting Chrome to prevent freeze..."
@@ -228,7 +228,7 @@ for index, row in df.iterrows():
         print("Page loaded")
 
         time.sleep(
-            random.uniform(5, 8)
+            random.uniform(30, 60)
         )
 
 

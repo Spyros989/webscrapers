@@ -14,7 +14,7 @@ import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
 import subprocess
 import re
-
+import random
 # =========================================================
 # KILL CHROMEDRIVER
 # =========================================================
@@ -63,8 +63,8 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT venue_id,club_name, facebook_events_current
-    FROM dim_venues WHERE facebook_events_current IS NOT NULL ORDER BY venue_id asc;
-    """)
+    FROM dim_venues WHERE facebook_events_current IS NOT NULL and web_scraper is null
+    ORDER BY venue_id asc;""")
 
 with engine.connect() as conn:
     df_clubs = pd.read_sql(query, conn)
@@ -157,7 +157,7 @@ for index, row in df_clubs.iterrows():
 
     print(f"\nProcessing: {club_name}, id:{venue_id}")
 
-    if index % 5 == 0 and index != 0:
+    if index % 10 == 0 and index != 0:
         print("Restarting Chrome to prevent freeze...")
 
         try:
@@ -219,8 +219,8 @@ for index, row in df_clubs.iterrows():
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
-    time.sleep(2)
-
+#    time.sleep(20)
+    time.sleep(random.uniform(30, 60))
 try:
     driver.quit()
 except Exception:

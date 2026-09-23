@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from pathlib import Path
-
+from datetime import datetime,timedelta
 # =========================================================
 # CONFIG
 # =========================================================
@@ -45,6 +45,69 @@ def parse_fb_date(value):
     text = text.replace("\xa0", " ")
 
     current_year = pd.Timestamp.now().year
+
+    # =========================================================
+    # CASE 0
+    # Relative Facebook dates
+    # =========================================================
+
+    today = pd.Timestamp.now().date()
+
+    relative_days = {
+        "today": 0,
+        "tomorrow": 1,
+        "monday": 0,
+        "tuesday": 1,
+        "wednesday": 2,
+        "thursday": 3,
+        "friday": 4,
+        "saturday": 5,
+        "sunday": 6,
+    }
+
+    m = re.search(
+        r"^(Today|Tomorrow|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"
+        r"\s+at\s+"
+        r"(.+?)"
+        r"(?:\s+[–-]\s+(.+?))?"
+        r"(?:\s+[A-Z]{3,5})?$",
+        text,
+        re.IGNORECASE
+    )
+
+    if m:
+
+        relative_day = m.group(1).lower()
+        start_time = m.group(2).strip()
+
+        day_value = relative_days[relative_day]
+
+        if relative_day in ("today", "tomorrow"):
+
+            event_date = today + timedelta(days=day_value)
+
+        else:
+
+            current_weekday = today.weekday()
+
+            target_weekday = day_value
+
+            days_ahead = (
+                target_weekday - current_weekday
+            ) % 7
+
+            event_date = today + timedelta(
+                days=days_ahead
+            )
+
+        return [
+            {
+                "status": "ok",
+                "event_date": event_date,
+                "event_time": start_time
+            }
+        ]
+
 
     # =========================================================
     # CASE 1

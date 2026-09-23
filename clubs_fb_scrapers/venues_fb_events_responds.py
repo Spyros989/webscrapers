@@ -66,8 +66,7 @@ inner join dim_venues_fb_events_contents dvfec
 on dvfec.event_url = dvfe.event_url
 and dvfec.venue_id = dvfe.venue_id
 where  status ='ok'
-and  cast(dvfec.event_date as date) >=date(now())
-and  cast(dvfec.event_date as date) <=date(now())+7
+and  cast(dvfec.event_date as date) =date(now())
 group by dvfec.venue_id,dvfec.event_url""")
 
 with engine.connect() as conn:
@@ -158,7 +157,7 @@ for index, row in df.iterrows():
     attendance = None
 
     # Restart Chrome every 5 URLs
-    if index % 5 == 0 and index != 0:
+    if index % 10 == 0 and index != 0:
 
         print("Restarting Chrome to prevent freeze...")
 
@@ -176,7 +175,7 @@ for index, row in df.iterrows():
         print("Page loaded")
 
         # Give Facebook a moment to finish rendering
-        time.sleep(random.uniform(2, 5))
+        time.sleep(random.uniform(40, 60))
 
         print("Searching spans...")
 

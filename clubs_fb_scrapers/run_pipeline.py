@@ -7,11 +7,10 @@ from datetime import datetime
 # PY SCRIPTS CONFIG
 # =========================================================
 scripts = [
-#"venues_fb_events.py"
-#,"venues_fb_events_clean.py"
-#,"venues_fb_events_clean_inject.py"
-#,
-"venues_fb_events_contents.py"
+"venues_fb_events.py"
+,"venues_fb_events_clean.py"
+,"venues_fb_events_clean_inject.py"
+,"venues_fb_events_contents.py"
 ,"venues_fb_events_contents_parsed.py"
 ,"venues_fb_events_contents_parsed_dates.py"
 ,"venues_fb_events_contents_parsed_dates_inject.py"
@@ -34,7 +33,7 @@ for script in scripts:
 	print("Started: ",
 		datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 	result = subprocess.run(
-		["python3", script],
+		[sys.executable, script],
         	cwd="/home/deploy/webscrapers/clubs_fb_scrapers",
 	)
 	script_end = time.time()

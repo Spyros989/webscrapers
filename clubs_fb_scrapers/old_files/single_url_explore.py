@@ -5,33 +5,87 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from dotenv import load_dotenv
+import subprocess
+import re
 
 # =========================================================
 # KILL CHROMEDRIVER
 # =========================================================
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
+#os.system("pkill -f chromedriver")
+#os.system("pkill -f chrome")
 
-EVENT_URL = "https://www.facebook.com/events/2016250215720613/"
+EVENT_URL = "https://www.facebook.com/events/2243819806468618/"
 
+HOME = Path.home()
+
+env_path = (
+    HOME
+    / "webscrapers"
+    / "bands_fb_scrapers"
+    / "ma_bands_fb_scrapers"
+    / ".env"
+)
+
+load_dotenv()
 
 # =========================================================
 # CHROME SETUP
 # =========================================================
 
+SCRAPER_PROFILE = (
+    Path.home() / "fb_scraper_profile"
+)
+
+
+def get_chromium_major_version():
+
+    output = subprocess.check_output(
+        ["/snap/bin/chromium", "--version"],
+        text=True
+    )
+
+    print("Chromium:", output.strip())
+
+    match = re.search(
+        r"(\d+)\.",
+        output
+    )
+
+    if not match:
+
+        raise RuntimeError(
+            f"Could not determine Chromium version: {output}"
+        )
+
+    return int(match.group(1))
+
+
 def create_driver():
+
     options = uc.ChromeOptions()
+
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
 
+    # Persistent scraper profile
+    options.add_argument(
+        f"--user-data-dir={SCRAPER_PROFILE}"
+    )
+
     options.binary_location = "/snap/bin/chromium"
+
+    chrome_version = get_chromium_major_version()
+
+    print("Chrome profile:", SCRAPER_PROFILE)
+    print("Chrome version:", chrome_version)
 
     driver = uc.Chrome(
         options=options,
-        version_main=151
+        version_main=chrome_version
     )
 
     driver.set_page_load_timeout(30)
@@ -39,11 +93,10 @@ def create_driver():
     return driver
 
 
+driver = create_driver()
 # =========================================================
 # MAIN
 # =========================================================
-
-driver = create_driver()
 
 try:
     print(f"Opening:\n{EVENT_URL}\n")
