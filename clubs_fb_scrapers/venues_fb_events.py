@@ -170,7 +170,7 @@ for index, row in df_clubs.iterrows():
     try:
         driver.get(url)
 
-        wait = WebDriverWait(driver, 15)
+        wait = WebDriverWait(driver, 10)
 
         wait.until(
             EC.presence_of_all_elements_located(
@@ -197,7 +197,7 @@ for index, row in df_clubs.iterrows():
                 seen.add(link)
 
                 all_events.append({
-		    "venue_id": venue_id,
+		            "venue_id": venue_id,
                     "club_name": club_name,
                     "event_name": text,
                     "event_url": link,
@@ -212,7 +212,7 @@ for index, row in df_clubs.iterrows():
         print(f"Failed club {club_name}: {ex}")
 
         all_events.append({
-	    "venue_id": venue_id,
+	        "venue_id": venue_id,
             "club_name": club_name,
             "event_name": "n/a",
             "event_url": "n/a",
