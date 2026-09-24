@@ -95,18 +95,16 @@ with engine.connect() as conn:
 # =========================================================
 
 query = text("""
-select
-dbfec.band_id
-,dbfec.event_url
-from dim_bands_fb_events dbfe
-inner join dim_bands_fb_events_contents dbfec
-on dbfec.event_url = dbfe.event_url
-and dbfec.band_id = dbfe.band_id
-where dbfec.event_date is null
-and status is null
-group by dbfec.band_id,dbfec.event_url
-order by dbfec.band_id asc;
-""")
+  SELECT
+ dbfe.event_url
+ from dim_bands_fb_events dbfe
+ left join dim_bands_fb_events_contents dbfec on dbfe.event_url=dbfec.event_url
+ left join dim_venues_fb_events_contents dvfec on dbfe.event_url=dvfec.event_url
+ left join bands_url_ignore bui on dbfe.event_url=bui.url
+ where dvfec.status is null 
+ and dbfec.status is null
+ and bui.url is NULL
+group by 1""")
 
 
 with engine.connect() as conn:
@@ -201,14 +199,13 @@ results = []
 for index, row in df.iterrows():
 
     url = row["event_url"]
-    band_id = row["band_id"]
 
     print("\n" + "=" * 80)
     print(f"Processing: {url}")
 
 
-    # Restart Chrome every 5 URLs
-    if index % 5 == 0 and index != 0:
+    # Restart Chrome every 10 URLs
+    if index % 10 == 0 and index != 0:
 
         print(
             "Restarting Chrome to prevent freeze..."
@@ -233,7 +230,7 @@ for index, row in df.iterrows():
         print("Page loaded")
 
         time.sleep(
-            random.uniform(2, 5)
+            random.uniform(12, 24)
         )
 
 
@@ -252,7 +249,6 @@ for index, row in df.iterrows():
         # -------------------------------------------------
 
         results.append({
-            "band_id": band_id,
             "event_url": url,
             "visible_text": visible_text
         })
@@ -272,7 +268,6 @@ for index, row in df.iterrows():
         )
 
         results.append({
-            "band_id": band_id,
             "event_url": url,
             "visible_text": None
         })
@@ -286,7 +281,6 @@ for index, row in df.iterrows():
         )
 
         results.append({
-            "band_id": band_id,
             "event_url": url,
             "visible_text": None
         })

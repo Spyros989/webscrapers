@@ -13,7 +13,7 @@ load_dotenv()
 load_dotenv(dotenv_path=env_path)
 
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-df = pd.read_csv("/home/deploy/data/scrapers/cz_bands_fb_events/bands_fb_events_deltas_clean.csv")
+df = pd.read_csv("/home/deploy/data/scrapers/cz_bands_fb_events/bands_fb_events_contents_parsed_dates.csv")
 df['insert_date'] = pd.Timestamp.now()
 # =========================================================
 # CONFIG
@@ -28,7 +28,7 @@ engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-df.to_sql("bands_fb_events_raw", engine, if_exists="append", index=False)
+df.to_sql("dim_bands_fb_events_contents", engine, if_exists="append", index=False)
 
 with engine.begin() as conn:
     conn.execute(text("CALL refresh_dim_bands_fb_events()"))

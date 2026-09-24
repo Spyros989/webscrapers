@@ -14,12 +14,7 @@ import undetected_chromedriver as uc
 from selenium.common.exceptions import TimeoutException
 import subprocess
 import re
-
-# =========================================================
-# KILL CHROMEDRIVER
-# =========================================================
-os.system("pkill -f chromedriver")
-os.system("pkill -f chrome")
+import random 
 
 HOME = Path.home()
 env_path = (
@@ -62,7 +57,7 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT band_id,band_name, fb_url_events_current
-    FROM dim_bands WHERE manual_check <>'X' ORDER BY band_id asc limit 25;
+    FROM dim_bands WHERE manual_check <>'X' and band_id>200 ORDER BY band_id asc;
     """)
 
 with engine.connect() as conn:
@@ -100,7 +95,7 @@ def create_driver():
 
     options = uc.ChromeOptions()
 
-#    options.add_argument("--headless=new")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
@@ -122,20 +117,20 @@ def create_driver():
         options=options,
         version_main=chrome_version
     )
-    print("Actual browser capabilities:")
-    print(driver.capabilities)
+#    print("Actual browser capabilities:")
+#    print(driver.capabilities)
     driver.set_page_load_timeout(30)
 
     return driver
 
 driver = create_driver()
-driver.get("https://www.facebook.com/")
-time.sleep(5)
+#driver.get("https://www.facebook.com/")
+#time.sleep(300)
 
-print("CURRENT URL:", driver.current_url)
-print("TITLE:", driver.title)
+#print("CURRENT URL:", driver.current_url)
+#print("TITLE:", driver.title)
 
-driver.quit()
+#driver.quit()
 # =========================================================
 # RESULTS
 # =========================================================
@@ -164,7 +159,7 @@ for index, row in df_bands.iterrows():
 
     print(f"\nProcessing: {band_name}, id:{band_id}, {counter} out of {len(df_bands)}")
 
-    if index % 5 == 0 and index != 0:
+    if index % 15 == 0 and index != 0:
         print("Restarting Chrome to prevent freeze...")
 
         try:
@@ -226,7 +221,7 @@ for index, row in df_bands.iterrows():
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
-    time.sleep(20)
+    time.sleep(random.uniform(12,24))
 
 try:
     driver.quit()

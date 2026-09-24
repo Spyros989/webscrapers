@@ -16,13 +16,6 @@ df["snapshot_date"] = pd.to_datetime(
     errors="coerce"
 ).dt.date
 
-df["snapshot_time"] = (
-    df["extraction_datetime"]
-    .str.split("_")
-    .str[1]
-    .str.replace(r"(\d{2})(\d{2})(\d{2})", r"\1:\2:\3", regex=True)
-)
-
 # ===== COLUMN ORDER CONFIG =====
 column_order = [
     "band_id",
@@ -30,7 +23,7 @@ column_order = [
     "event_name",
     "event_url",
     "snapshot_date",
-    "snapshot_time",
+#    "snapshot_time",
     "extraction_datetime"
 ]
 
