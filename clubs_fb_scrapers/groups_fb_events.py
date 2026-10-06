@@ -32,7 +32,7 @@ env_path = (
 load_dotenv()
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_FILE = OUTPUT_DIR / f"venues_fb_events_daily.csv"
+OUTPUT_FILE = OUTPUT_DIR / f"group_fb_events.csv"
 #today = datetime.now().strftime("%Y-%m-%d")
 
 print("Loading .env from:", env_path)
@@ -62,14 +62,13 @@ with engine.connect() as conn:
 # LOAD CLUBS FROM POSTGRES
 # ----------------------------
 query = text("""
-    SELECT venue_id,club_name, facebook_events_current
-    FROM dim_venues WHERE facebook_events_current IS NOT NULL and web_scraper is null
-    ORDER BY venue_id asc;""")
+ select group_id,group_name,group_url from dim_groups
+order by group_id asc""")
 
 with engine.connect() as conn:
     df_clubs = pd.read_sql(query, conn)
 
-print(f"Loaded {len(df_clubs)} clubs from Postgres")
+print(f"Loaded {len(df_clubs)} groups from Postgres")
 
 # =========================================================
 # CHROME SETUP
@@ -142,20 +141,20 @@ seen = set()
 # ----------------------------
 for index, row in df_clubs.iterrows():
 
-    club_name = row["club_name"]
-    url = row["facebook_events_current"]
-    venue_id = row["venue_id"]
+    group_name = row["group_name"]
+    url = row["group_url"]
+    group_id = row["group_id"]
     if not url:
         all_events.append({
-	    "venue_id": venue_id,
-            "club_name": club_name,
+	    "group_id": group_id,
+            "group_name": group_name,
             "event_name": "n/a",
             "event_url": "n/a",
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
         continue
 
-    print(f"\nProcessing: {club_name}, id:{venue_id}")
+    print(f"\nProcessing: {group_name}, id:{group_id}")
 
     if index % 10 == 0 and index != 0:
         print("Restarting Chrome to prevent freeze...")
@@ -197,8 +196,8 @@ for index, row in df_clubs.iterrows():
                 seen.add(link)
 
                 all_events.append({
-		            "venue_id": venue_id,
-                    "club_name": club_name,
+		    "group_id": group_id,
+                    "group_name": group_name,
                     "event_name": text,
                     "event_url": link,
                     "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -209,11 +208,11 @@ for index, row in df_clubs.iterrows():
 
     except Exception as ex:
 
-        print(f"Failed club {club_name}: {ex}")
+        print(f"Failed group {group_name}: {ex}")
 
         all_events.append({
-	        "venue_id": venue_id,
-            "club_name": club_name,
+	    "group_id": group_id,
+            "group_name": group_name,
             "event_name": "n/a",
             "event_url": "n/a",
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")

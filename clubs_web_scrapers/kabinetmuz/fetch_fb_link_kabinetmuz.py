@@ -19,7 +19,7 @@ df = pd.read_csv(INPUT_FILE)
 
 
 # New column
-df["facebook_event"] = ""
+df["event_url"] = ""
 
 with sync_playwright() as p:
 
@@ -28,7 +28,7 @@ with sync_playwright() as p:
 
     for idx, row in df.iterrows():
 
-        url = row["link"]
+        url = row["web_link"]
 
         print(f"Checking: {url}")
 
@@ -52,10 +52,34 @@ with sync_playwright() as p:
                 if "facebook.com/events" in href:
                     fb_link = href
                     break
+            # -------------------------
+            # 2. DATE + TIME BLOCK
+            # -------------------------
+            date_time = ""
 
-            df.at[idx, "facebook_event"] = fb_link
+            detail_block = soup.find("div", class_="detail__info")
+            if detail_block:
+                raw_text = detail_block.get_text(" ", strip=True)
+    	    # Extract start time, e.g. "začátek 20:00"
+               time_match = re.search(r"začátek\s+(\d{1,2}):(\d{2})", raw_text, re.IGNORECASE)
+               if time_match: 
+		  hour = int(time_match.group(1)) 
+		  minute = int(time_match.group(2)) 
+	    # Convert to 12-hour format 
+	          am_pm = "AM" if hour < 12 else "PM" 
+	          hour_12 = hour % 12 
+	          if hour_12 == 0: 
+		      hour_12 = 12 
+	          date_time = f"{hour_12}:{minute:02d} {am_pm}"
+            
+	    # -------------------------
+            # SAVE RESULTS
+            # -------------------------
+            df.at[idx, "event_url"] = (fb_link if not fb_link else fb_link.rstrip("/") + "/")
+            df.at[idx, "date_time"] = date_time
 
-            print("FOUND" if fb_link else "NO FB EVENT")
+            print("FB:", "FOUND" if fb_link else "NONE")
+            print("DATE/TIME:", date_time)
 
             # small delay to be polite
             time.sleep(1)

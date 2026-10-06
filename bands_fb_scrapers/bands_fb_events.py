@@ -57,12 +57,12 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT band_id,band_name, fb_url_events_current
-    FROM dim_bands WHERE manual_check <>'X' and band_id>200 ORDER BY band_id asc;
+    FROM dim_bands WHERE manual_check <>'X' and band_id>250 and band_id<=450  ORDER BY band_id asc;
     """)
 
 with engine.connect() as conn:
     df_bands = pd.read_sql(query, conn)
-df_bands = df_bands.sample(frac=1).reset_index(drop=True)
+#df_bands = df_bands.sample(frac=1).reset_index(drop=True)
 print(f"Loaded {len(df_bands)} bands from Postgres")
 
 # =========================================================
@@ -221,7 +221,7 @@ for index, row in df_bands.iterrows():
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
-    time.sleep(random.uniform(12,24))
+    time.sleep(random.uniform(14,24))
 
 try:
     driver.quit()

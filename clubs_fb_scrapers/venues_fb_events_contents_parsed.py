@@ -6,9 +6,9 @@ import pandas as pd
 # =========================================================
 
 INPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/venues_fb_events_contents.csv"
-
+#INPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/single_url_export.csv"
 OUTPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/venues_fb_events_contents_clean.csv"
-
+#OUTPUT_FILE = "/home/deploy/data/scrapers/cz_clubs_fb_events/single_url_export_clean.csv"
 
 # =========================================================
 # LOAD SCRAPED DATA

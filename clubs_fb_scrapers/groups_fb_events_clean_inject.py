@@ -9,10 +9,11 @@ from dotenv import load_dotenv
 env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
 load_dotenv()
 
+load_dotenv()
 load_dotenv(dotenv_path=env_path)
 
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-df = pd.read_csv("/home/deploy/data/scrapers/cz_clubs_fb_events/venues_fb_events_responds_clean.csv")
+df = pd.read_csv("/home/deploy/data/scrapers/cz_clubs_fb_events/groups_fb_events_clean.csv")
 df['insert_date'] = pd.Timestamp.now()
 # =========================================================
 # CONFIG
@@ -27,8 +28,9 @@ engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-df.to_sql("dim_venues_fb_events_responds", engine, if_exists="append", index=False)
-with engine.begin() as conn:
-    conn.execute(text("CALL refresh_prd_fb_events()"))
+df.to_sql("groups_fb_events_raw", engine, if_exists="append", index=False)
 
+#with engine.begin() as conn:
+#    conn.execute(text("CALL refresh_dim_venues_fb_events()"))
+#    conn.execute(text("CALL update_venues_url_ignore()"))
 print("Import and refresh complete")

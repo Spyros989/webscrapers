@@ -32,5 +32,5 @@ df.to_sql("venues_fb_events_raw", engine, if_exists="append", index=False)
 
 with engine.begin() as conn:
     conn.execute(text("CALL refresh_dim_venues_fb_events()"))
-
+#    conn.execute(text("CALL update_venues_url_ignore()"))
 print("Import and refresh complete")
