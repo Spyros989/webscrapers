@@ -93,15 +93,15 @@ select
 dvfe.venue_id
 ,dvfe.event_name
 ,dvfe.event_url
-,dvfec.event_date 
 from dim_venues_fb_events dvfe
 left join dim_venues_fb_events_contents dvfec
 on dvfec.event_url = dvfe.event_url
 left join venues_url_ignore vui
 on dvfe.event_url=vui.url
-where dvfec.event_date is null
+where dvfec.date is null
 and vui.url is null
-group by 1,2,3,4""")
+and web_link is null
+group by 1,2,3""")
 
 
 with engine.connect() as conn:
