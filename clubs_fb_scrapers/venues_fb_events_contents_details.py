@@ -22,48 +22,57 @@ print(f"Loaded {len(df)} events")
 # =========================================================
 # PARSE EVENT CONTENT
 # =========================================================
-
 def parse_event(text):
 
     if pd.isna(text):
-        return None, None, None
+        return None, None, None, None
 
     lines = text.splitlines()
 
-
     for i, line in enumerate(lines):
 
-    # Find our anchor
+        # Find our anchor
         if line.strip() == "Visual Arts":
 
             try:
-            # i     = Visual Arts
-            # i + 1 = number of responses
-            # i + 2 = date
-            # i + 3 = title
-            # i + 4 = location
+                # i     = Visual Arts
+                # i + 1 = number of responses
+                # i + 2 = date
+                # i + 3 = title
+                # i + 4 = location
 
                 date = lines[i + 2].strip()
                 title = lines[i + 3].strip()
                 location = lines[i + 4].strip()
 
-            # -------------------------
-            # FIND DURATION
-            # -------------------------
+                # -------------------------
+                # FIND DURATION
+                # -------------------------
 
                 duration = None
-    for next_line in lines[i + 5:]: 
-	next_line = next_line.strip() 
-	if next_line.lower().startswith("duration:"): 
-		duration = next_line.split( ":", 1 )[1].strip() 
-	break 
-		return date, title, location, duration 
-    except IndexError: 
 
-    return None, None, None, None
-            # Look at the lines following the
+                # Search everything after the location
+                for next_line in lines[i + 5:]:
+
+                    next_line = next_line.strip()
+
+                    if next_line.lower().startswith("duration:"):
+
+                        duration = next_line.split(
+                            ":", 1
+                        )[1].strip()
+
+                        break
+
+                return date, title, location, duration
+
+            except IndexError:
+
+                return None, None, None, None
+
     # Visual Arts was not found
-    #return None, None, None, None
+    return None, None, None, None
+
 
 
 # =========================================================
