@@ -24,12 +24,9 @@ scripts = [
     "venues_fb_events_clean.py",
     "venues_fb_events_clean_inject.py",
     "venues_fb_events_contents.py",
-    "venues_fb_events_contents_parsed.py",
-    "venues_fb_events_contents_parsed_dates.py",
-    "venues_fb_events_contents_parsed_dates_inject.py",
-#    "venues_fb_events_responds.py",
-#    "venues_fb_events_responds_clean.py",
-#    "venues_fb_events_responds_clean_inject.py",
+    "venues_fb_events_contents_details.py",
+    "venues_fb_events_contents_details_dates.py",
+    "venues_fb_events_contents_details_dates_inject.py",
     "venues_fb_events_errors.py"
 ]
 

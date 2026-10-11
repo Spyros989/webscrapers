@@ -15,7 +15,7 @@ import re
 #os.system("pkill -f chromedriver")
 #os.system("pkill -f chrome")
 
-EVENT_URL = "https://www.facebook.com/events/2243819806468618/"
+EVENT_URL = "https://www.facebook.com/events/897897479947438/"
 
 HOME = Path.home()
 
