@@ -27,13 +27,13 @@ load_dotenv(dotenv_path=env_path)
 # PY SCRIPTS CONFIG
 # =========================================================
 scripts = [
-#    "venues_fb_events.py",
-#    "venues_fb_events_clean.py",
-#    "venues_fb_events_clean_inject.py",
-#    "venues_fb_events_contents.py",
-#    "venues_fb_events_contents_details.py",
-#    "venues_fb_events_contents_details_dates.py",
-#    "venues_fb_events_contents_details_dates_inject.py",
+    "venues_fb_events.py",
+    "venues_fb_events_clean.py",
+    "venues_fb_events_clean_inject.py",
+    "venues_fb_events_contents.py",
+    "venues_fb_events_contents_details.py",
+    "venues_fb_events_contents_details_dates.py",
+    "venues_fb_events_contents_details_dates_inject.py",
     "venues_fb_events_errors.py"
 ]
 
@@ -89,9 +89,7 @@ for script in scripts:
 # =========================================================
 # CALL DATABASE PROCEDURE
 # =========================================================
-# =========================================================
-# CONFIG
-# =========================================================
+
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
 DB_HOST = os.getenv("DB_HOST")
@@ -108,7 +106,7 @@ engine = create_engine(
 with engine.begin() as conn:
     conn.execute(text("CALL refresh_prd_fb_events()"))
 
-print("Procudeure call completed successfully.")
+print("Procedure call completed successfully.")
 
 
 # =========================================================

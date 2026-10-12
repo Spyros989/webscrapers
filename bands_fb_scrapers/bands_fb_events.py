@@ -57,12 +57,11 @@ with engine.connect() as conn:
 # ----------------------------
 query = text("""
     SELECT band_id,band_name, fb_url_events_current
-    FROM dim_bands WHERE manual_check <>'X' and band_id>250 and band_id<=450  ORDER BY band_id asc;
+    FROM dim_bands WHERE manual_check <>'X' and band_id>300  ORDER BY band_id asc;
     """)
 
 with engine.connect() as conn:
     df_bands = pd.read_sql(query, conn)
-#df_bands = df_bands.sample(frac=1).reset_index(drop=True)
 print(f"Loaded {len(df_bands)} bands from Postgres")
 
 # =========================================================
@@ -117,20 +116,12 @@ def create_driver():
         options=options,
         version_main=chrome_version
     )
-#    print("Actual browser capabilities:")
-#    print(driver.capabilities)
     driver.set_page_load_timeout(30)
 
     return driver
 
 driver = create_driver()
-#driver.get("https://www.facebook.com/")
-#time.sleep(300)
 
-#print("CURRENT URL:", driver.current_url)
-#print("TITLE:", driver.title)
-
-#driver.quit()
 # =========================================================
 # RESULTS
 # =========================================================
@@ -139,7 +130,7 @@ all_events = []
 seen = set()
 
 # ----------------------------
-# SCRAPE EACH CLUB PAGE
+# SCRAPE EACH BAND PAGE
 # ----------------------------
 for index, row in df_bands.iterrows():
 
