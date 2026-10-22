@@ -3,17 +3,24 @@ import sys
 import time
 from datetime import datetime
 import os
-
-import psycopg2
+from pathlib import Path
+from sqlalchemy import create_engine,text
 from dotenv import load_dotenv
 
 
 # =========================================================
 # LOAD ENVIRONMENT
 # =========================================================
-load_dotenv(
-    "/home/deploy/webscrapers/clubs_fb_scrapers/.env"
+HOME = Path.home()
+env_path = (
+	HOME
+	/"webscrapers"
+	/"bands_fb_scrapers"
+	/"ma_bands_fb_scrapers"
+	/".env"
 )
+load_dotenv()
+load_dotenv(dotenv_path=env_path)
 
 
 # =========================================================
@@ -23,7 +30,6 @@ scripts = [
     "venues_fb_events_responds.py",
     "venues_fb_events_responds_clean.py",
     "venues_fb_events_responds_clean_inject.py"]
-
 
 print("=" * 80)
 print("PIPELINE START")
@@ -76,52 +82,24 @@ for script in scripts:
 # =========================================================
 # CALL DATABASE PROCEDURE
 # =========================================================
+
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
 print("\n" + "-" * 80)
 print("Calling PostgreSQL procedure: refresh_prd_fb_events()")
 
-procedure_start = time.time()
 
-try:
+engine = create_engine(
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+with engine.begin() as conn:
+    conn.execute(text("CALL refresh_prd_fb_events()"))
 
-    conn = psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT", "5432"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-    )
-
-    conn.autocommit = True
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "CALL refresh_prd_fb_events();"
-    )
-
-    cursor.close()
-    conn.close()
-
-    procedure_end = time.time()
-    procedure_duration = procedure_end - procedure_start
-
-    print(
-        "Procedure completed successfully."
-    )
-
-    print(
-        f"Procedure duration: {procedure_duration:.1f} seconds"
-    )
-
-except Exception as e:
-
-    print(
-        "\nERROR: refresh_prd_fb_events() failed."
-    )
-
-    print(e)
-
-    sys.exit(1)
+print("Procedure call completed successfully.")
 
 
 # =========================================================
