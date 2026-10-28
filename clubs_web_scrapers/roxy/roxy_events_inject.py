@@ -42,8 +42,6 @@ query = text("""
 
 with engine.connect() as conn:
     df_urls = pd.read_sql(query, conn)
-print('existing events')
-print(df_urls)
 
 # Normalize URLs to avoid whitespace mismatches
 db_urls = set(
@@ -92,11 +90,13 @@ df_contents_filtered = df_contents_filtered.drop(columns=[col for col in df_cont
 df_contents_filtered.drop_duplicates()
 
 
-df_contents_filtered.to_sql("klub007_fb_events_contents_test", engine, if_exists="append", index=False)
-df_events_filtered.to_sql("klub007_fb_events_test", engine, if_exists="append", index=False)
+df_contents_filtered.to_sql("dim_venues_fb_events_contents", engine, if_exists="append", index=False)
+df_events_filtered.to_sql("dim_venues_fb_events", engine, if_exists="append", index=False)
 
 with engine.begin() as conn:
     conn.execute(text("CALL refresh_dim_venues_fb_events()"))
 
+print(f"inserted {len(df_events_filtered)} rows in dim_venues_fb_events")
+print(f"inserted {len(df_contents_filtered)} rows in dim_venues_fb_events_contents")
 print("Import and refresh complete")
 

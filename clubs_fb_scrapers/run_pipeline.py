@@ -34,7 +34,8 @@ scripts = [
     "venues_fb_events_contents_details.py",
     "venues_fb_events_contents_details_dates.py",
     "venues_fb_events_contents_details_dates_inject.py",
-    "venues_fb_events_errors.py"
+    "venues_fb_events_errors.py",
+    "venues_fb_events_ignore_inject.py"
 ]
 
 
