@@ -157,16 +157,6 @@ for index, row in df_clubs.iterrows():
 
     print(f"\nProcessing: {club_name}, id:{venue_id}")
 
-    if index % 20 == 0 and index != 0:
-        print("Restarting Chrome to prevent freeze...")
-
-        try:
-            driver.quit()
-        except:
-            pass
-
-        driver = create_driver()
-
     try:
         driver.get(url)
 
