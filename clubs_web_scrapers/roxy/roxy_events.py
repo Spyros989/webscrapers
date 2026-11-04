@@ -181,11 +181,18 @@ with sync_playwright() as p:
 
     finally:
         browser.close()
-df["event_date"] = pd.to_datetime(df["event_date"]).dt.strftime("%Y-%m-%d")
+#df["event_date"] = pd.to_datetime(df["event_date"]).dt.strftime("%Y-%m-%d")
 df_filtered = df[df["event_url"].notnull()]
 df_filtered["event_url"] = df_filtered["event_url"].apply(expand_short_url)
 df_filtered["event_url"] = df_filtered["event_url"].str.split("?").str[0]
-
+df_filtered["event_url"] = df_filtered["event_url"].apply(
+    lambda url: url.rstrip("/") + "/"
+    if pd.notna(url) and url != "N/A" and url.strip()
+    else url
+)
+df_filtered["snapshot_date"]=timestamp
+df_filtered["venue_id"]=97
+df_filtered["location"]="Dlouhá 33, Praha 1, Czech Republic, 11000"
 # Filter the DataFrame to exclude those tags
 # (~ negates the condition, meaning "does NOT contain")
 df_filtered = df_filtered[~df_filtered["tags"].str.contains(pattern, na=False)]

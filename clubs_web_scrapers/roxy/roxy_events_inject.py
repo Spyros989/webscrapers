@@ -15,7 +15,7 @@ timestamp = pd.Timestamp.now()
 
 csv_path = (
     "/home/deploy/data/scrapers/cz_clubs_web_events/"
-    "klub007/klub007_events.csv"
+    "roxy/roxy_events_entrance_fee.csv"
 )
 
 df_events = pd.read_csv(csv_path, encoding="utf-8-sig")
@@ -38,7 +38,7 @@ engine = create_engine(
 )
 
 query = text("""
-    SELECT event_url from dim_venues_fb_events_contents WHERE venue_id=68;""")
+    SELECT event_url from dim_venues_fb_events_contents WHERE venue_id=97;""")
 
 with engine.connect() as conn:
     df_urls = pd.read_sql(query, conn)
@@ -62,10 +62,10 @@ events_column_order = [
     "venue_id",
     "event_name",
     "event_url",
-    "snapshot_date",
+#    "snapshot_date",
     "insert_date"
 ]
-df_events_filtered["event_name"]=df_events_filtered["title"]
+$df_events_filtered["event_name"]=df_events_filtered["title"]
 df_events_filtered = df_events_filtered.drop(columns=[col for col in df_events_filtered if col not in events_column_order])
 df_events_filtered[events_column_order]
 df_events_filtered.drop_duplicates()
@@ -74,7 +74,7 @@ contents_column_order = [
     "venue_id",
     "event_url",
     "date",
-    "title",
+#    "title",
     "location",
     "status",
     "event_date",
@@ -90,8 +90,8 @@ df_contents_filtered = df_contents_filtered.drop(columns=[col for col in df_cont
 df_contents_filtered.drop_duplicates()
 
 
-df_contents_filtered.to_sql("dim_venues_fb_events_contents", engine, if_exists="append", index=False)
-df_events_filtered.to_sql("dim_venues_fb_events", engine, if_exists="append", index=False)
+df_contents_filtered.to_sql("roxy_dim_venues_fb_events_contents", engine, if_exists="append", index=False)
+df_events_filtered.to_sql("roxy_dim_venues_fb_events", engine, if_exists="append", index=False)
 
 with engine.begin() as conn:
     conn.execute(text("CALL refresh_dim_venues_fb_events()"))
