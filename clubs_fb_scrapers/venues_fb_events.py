@@ -64,7 +64,7 @@ with engine.connect() as conn:
 query = text("""
     SELECT venue_id,club_name, facebook_events_current
     FROM dim_venues WHERE facebook_events_current IS NOT NULL and web_scraper is null
-    ORDER BY venue_id asc;""")
+    ORDER BY venue_id asc Limit 10;""")
 
 with engine.connect() as conn:
     df_clubs = pd.read_sql(query, conn)
@@ -130,6 +130,16 @@ def create_driver():
 
 driver = create_driver()
 
+def restart_driver(old_driver=None):
+    if old_driver is not None:
+        try:
+            old_driver.quit()
+        except Exception:
+            pass
+
+    print("Restarting Chromium driver...")
+    return create_driver()
+
 # =========================================================
 # RESULTS
 # =========================================================
@@ -145,9 +155,10 @@ for index, row in df_clubs.iterrows():
     club_name = row["club_name"]
     url = row["facebook_events_current"]
     venue_id = row["venue_id"]
+
     if not url:
         all_events.append({
-	    "venue_id": venue_id,
+            "venue_id": venue_id,
             "club_name": club_name,
             "event_name": "n/a",
             "event_url": "n/a",
@@ -157,52 +168,69 @@ for index, row in df_clubs.iterrows():
 
     print(f"\nProcessing: {club_name}, id:{venue_id}, date & time: {datetime.now().strftime("%Y-%m-%d, %H:%M:%S")}")
 
-    try:
-        driver.get(url)
+    success = False
 
-        wait = WebDriverWait(driver, 10)
+    for attempt in range(2):
 
-        wait.until(
-            EC.presence_of_all_elements_located(
-                (By.XPATH, "//a[contains(@href, '/events/')]")
+        try:
+            # Check whether the browser session is alive
+            driver.current_url
+
+            driver.get(url)
+
+            wait = WebDriverWait(driver, 10)
+
+            wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, "//a[contains(@href, '/events/')]")
+                )
             )
-        )
 
-        event_elements = driver.find_elements(
-            By.XPATH,
-            "//a[contains(@href, '/events/')]"
-        )
+            event_elements = driver.find_elements(
+                By.XPATH,
+                "//a[contains(@href, '/events/')]"
+            )
 
-        for e in event_elements:
-            try:
-                text = e.text.strip()
-                link = e.get_attribute("href")
+            for e in event_elements:
+                try:
+                    text = e.text.strip()
+                    link = e.get_attribute("href")
 
-                if not text or not link:
-                    continue
+                    if not text or not link:
+                        continue
 
-                if link in seen:
-                    continue
+                    if link in seen:
+                        continue
 
-                seen.add(link)
+                    seen.add(link)
 
-                all_events.append({
-		            "venue_id": venue_id,
-                    "club_name": club_name,
-                    "event_name": text,
-                    "event_url": link,
-                    "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
-                })
+                    all_events.append({
+                        "venue_id": venue_id,
+                        "club_name": club_name,
+                        "event_name": text,
+                        "event_url": link,
+                        "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                    })
 
-            except Exception as ex:
-                print("Event error:", ex)
+                except Exception as ex:
+                    print("Event error:", ex)
 
-    except Exception as ex:
+            success = True
+            break
 
-        print(f"Failed club {club_name}: {ex}")
+        except Exception as ex:
 
+            print(
+                f"Failed club {club_name}, "
+                f"attempt {attempt + 1}: {ex}"
+            )
+
+            # Restart browser before retrying
+            driver = restart_driver(driver)
+
+    if not success:
         all_events.append({
-	        "venue_id": venue_id,
+            "venue_id": venue_id,
             "club_name": club_name,
             "event_name": "n/a",
             "event_url": "n/a",
@@ -210,16 +238,15 @@ for index, row in df_clubs.iterrows():
         })
 
     time.sleep(random.uniform(20, 35))
+
 try:
     driver.quit()
 except Exception:
     pass
 
-driver = create_driver()
-# ----------------------------
-# SAVE OUTPUT
-# ----------------------------
+# Save output
 df_events = pd.DataFrame(all_events)
 df_events.to_csv(OUTPUT_FILE, index=False)
+
 
 print(f"Done. Saved {len(df_events)} events → {OUTPUT_FILE}")
