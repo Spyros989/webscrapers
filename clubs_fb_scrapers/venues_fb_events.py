@@ -155,7 +155,7 @@ for index, row in df_clubs.iterrows():
         })
         continue
 
-    print(f"\nProcessing: {club_name}, id:{venue_id}")
+    print(f"\nProcessing: {club_name}, id:{venue_id}, date & time: {datetime.now().strftime("%Y-%m-%d, %H:%M:%S")}")
 
     try:
         driver.get(url)
@@ -209,7 +209,6 @@ for index, row in df_clubs.iterrows():
             "extraction_datetime": datetime.now().strftime("%Y-%m-%d_%H%M%S")
         })
 
-#    time.sleep(20)
     time.sleep(random.uniform(20, 35))
 try:
     driver.quit()

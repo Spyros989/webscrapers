@@ -148,7 +148,7 @@ for index, row in df.iterrows():
     venue_id = row["venue_id"]
     counter = index +1
     print("\n" + "=" * 80)
-    print(f"Processing: {url} , {counter} out of {len(df)}")
+    print(f"Processing: {url} , {counter} out of {len(df)} , date & time: {datetime.now().strftime("%Y-%m-%d, %H:%M:%S")}")
 
     attendance = None
 

@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 import subprocess
 import re
+from datetime import datetime
 
 
 # =========================================================
@@ -199,11 +200,11 @@ for index, row in df.iterrows():
     venue_id = row["venue_id"]
     counter = counter + 1
     print("\n" + "=" * 80)
-    print(f"Processing: {url} - {counter} out of {len(df)}")
+    print(f"Processing: {url} - {counter} out of {len(df)}, date & time: {datetime.now().strftime("%Y-%m-%d, %H:%M:%S")} ")
 
 
-    # Restart Chrome every 5 URLs
-    if index % 10 == 0 and index != 0:
+    # Restart Chrome every 20 URLs
+    if index % 20 == 0 and index != 0:
 
         print(
             "Restarting Chrome to prevent freeze..."
