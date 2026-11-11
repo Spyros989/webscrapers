@@ -181,8 +181,10 @@ with sync_playwright() as p:
 
     finally:
         browser.close()
+
 #df["event_date"] = pd.to_datetime(df["event_date"]).dt.strftime("%Y-%m-%d")
 df_filtered = df[df["event_url"].notnull()]
+df_filtered["event_date"] = pd.to_datetime(df_filtered["event_date"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
 df_filtered["event_url"] = df_filtered["event_url"].apply(expand_short_url)
 df_filtered["event_url"] = df_filtered["event_url"].str.split("?").str[0]
 df_filtered["event_url"] = df_filtered["event_url"].apply(

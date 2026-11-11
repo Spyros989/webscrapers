@@ -33,7 +33,6 @@ load_dotenv()
 OUTPUT_DIR = Path("/home/deploy/data/scrapers/cz_clubs_fb_events")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / f"venues_fb_events_daily.csv"
-#today = datetime.now().strftime("%Y-%m-%d")
 
 print("Loading .env from:", env_path)
 load_dotenv(dotenv_path=env_path)
@@ -64,7 +63,7 @@ with engine.connect() as conn:
 query = text("""
     SELECT venue_id,club_name, facebook_events_current
     FROM dim_venues WHERE facebook_events_current IS NOT NULL and web_scraper is null
-    ORDER BY venue_id asc Limit 10;""")
+    ORDER BY venue_id asc;""")
 
 with engine.connect() as conn:
     df_clubs = pd.read_sql(query, conn)
