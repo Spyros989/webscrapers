@@ -1,0 +1,95 @@
+import time
+from sqlalchemy import create_engine,text
+import pandas as pd
+from pathlib import Path
+from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+env_path = Path("/home/deploy/webscrapers/bands_fb_scrapers/ma_bands_fb_scrapers/.env")
+
+load_dotenv()
+load_dotenv(dotenv_path=env_path)
+
+timestamp = pd.Timestamp.now()
+
+csv_path = (
+    "/home/deploy/data/scrapers/cz_clubs_web_events/"
+    "garageclub/garageclub_events.csv"
+)
+
+df_events = pd.read_csv(csv_path, encoding="utf-8-sig")
+df_contents = pd.read_csv(csv_path, encoding="utf-8-sig")
+
+df_events["insert_date"] = timestamp
+df_contents["insert_date"] = timestamp
+
+# =========================================================
+# CONFIG
+# =========================================================
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
+engine = create_engine(
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+query = text("""
+    SELECT title,event_url from dim_venues_fb_events_contents WHERE venue_id=51;""")
+
+with engine.connect() as conn:
+    df_urls = pd.read_sql(query, conn)
+
+# Normalize URLs to avoid whitespace mismatches
+db_urls = set(
+    df_urls[["title","event_url"]]
+    .dropna()
+    .astype(str)
+)
+
+
+events_column_order = [
+    "venue_id",
+    "event_name",
+    "event_url",
+    "snapshot_date",
+    "insert_date"
+]
+#df_events_filtered["event_name"]=df_events_filtered["title"]
+#df_events_filtered = df_events_filtered.drop(columns=[col for col in df_events_filtered if col not in events_column_order])
+#df_events_filtered[events_column_order]
+#df_events_filtered.drop_duplicates()
+
+contents_column_order = [
+    "venue_id",
+    "event_url",
+    "date",
+    "title",
+    "location",
+    "status",
+    "event_date",
+    "event_time",
+    "insert_date",
+    "entrance_fee",
+    "web_link",
+    "duration"
+]
+
+#df_contents_filtered[contents_column_order]
+#df_contents_filtered = df_contents_filtered.drop(columns=[col for col in df_contents_filtered if col not in contents_column_order])
+#df_contents_filtered.drop_duplicates()
+print(df_urls)
+
+#df_contents_filtered.to_sql("dim_venues_fb_events_contents", engine, if_exists="append", index=False)
+#df_events_filtered.to_sql("dim_venues_fb_events", engine, if_exists="append", index=False)
+
+#with engine.begin() as conn:
+#    conn.execute(text("CALL refresh_dim_venues_fb_events()"))
+
+#print(f"inserted {len(df_events_filtered)} rows in dim_venues_fb_events")
+#print(f"inserted {len(df_contents_filtered)} rows in dim_venues_fb_events_contents")
+#print("Import and refresh complete")
+
